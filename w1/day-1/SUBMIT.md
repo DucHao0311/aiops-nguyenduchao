@@ -61,7 +61,7 @@ Phương pháp phù hợp nhất để detect anomaly là:
   1. STL Decomposition (period=12, robust=True) → isolate residuals
   2. IQR thresholds on residuals → detect anomalies
 - **Advantages:** Interpretable, handles seasonality
-- **Disadvantages:** High false positive rate (376 FP), poor precision
+- **Disadvantages:** High false positive rate (23 FP), poor precision
 
 Nạp ground_truth
 <img width="1054" height="353" alt="image" src="https://github.com/user-attachments/assets/e7b87b98-c81c-4c49-b666-e9e9fd7cc427" />
@@ -99,30 +99,54 @@ Log output cho Detector 2 chạy với 3 contamination [0.01, 0.02, 0.05]
 ### Detector Comparison - Time Series Plots
 **Description:** Three vertically stacked plots showing:
 -  STL+IQR detected anomalies (red dots) overlaid on EC2 latency curve (blue)
-  - Anomalies detected: 379
+  - Anomalies detected: 23
   - Pattern: Concentrated in spikes > 60ms
 <img width="1056" height="882" alt="image" src="https://github.com/user-attachments/assets/70db365c-e8db-4275-abe0-3f92e34658c4" />
 
--  Isolation Forest detected anomalies with best contamination parameter
-  - Anomalies detected: 39 (for contamination=0.01)
-  - More selective than STL+IQR, fewer false positives
--  Ground truth anomaly points from NAB (black diamonds)
-  - 3 points total: 2014-03-14, 2014-03-18, 2014-03-21
-  - All during system failure events
+
+Description: Three vertically stacked plots showing:
+
+- Subplot 1: STL + IQR detected anomalies (Red dots) overlaid on EC2 latency curve (Blue).
+
+  - Anomalies detected: 23 points (3 True Positives + 20 False Alarms).
+
+  - Pattern: Highly selective, successfully isolating the extreme latency spikes.
+
+- Subplot 2: Isolation Forest detected anomalies (Purple/Orange markers) with the best contamination parameter.
+
+  - Anomalies detected: 42 points (3 True Positives + 39 False Alarms).
+
+  - Pattern: More sensitive than STL+IQR, capturing not only the main spikes but also surrounding contextual fluctuations, leading to a higher false alarm rate.
+
+- Subplot 3: Ground truth anomaly points from NAB (Black diamonds)
+
+  - 3 points total (All 3 real failures are captured perfectly by both detectors).
 
 ### Comparison Table - Metrics
 **Description:** DataFrame showing:
 
 | Detector | Precision | Recall | F1-Score | False Alarms | Anomalies Detected |
 |----------|-----------|--------|----------|--------------|-------------------|
-| STL + IQR | 0.0079 | 1.000 | 0.0157 | 376 | 379 |
-| **Isolation Forest (best)** | **0.0714** | **1.000** | **0.1333** | **39** | **42** |
+| **STL + IQR** | **0.1304** | **1.000** | **0.2308** | **20** | **23** |
+| Isolation Forest (best) | 0.0714 | 1.000 | 0.1333 | 39 | 42 |
 
 **Interpretation:**
-- IF achieves **9× better precision** (0.0714 vs 0.0079)
-- Both achieve perfect recall (catches all 3 ground truth anomalies)
-- IF dramatically reduces false alarms: **90% fewer FP** (39 vs 376)
-- **Winner: Isolation Forest** for production use
+- Detection ability (Recall): Both methods achieve perfect performance (Recall = 1.0000), capturing all 3 unusual points (Ground Truth) in the data set.
+
+- Accuracy and False Alarms: STL + IQR statistical model outperforms Isolation Forest machine learning model:
+
+  - The Precision score is nearly 2 times higher (0.1304 compared to 0.0714).
+
+  - Reduced the number of false alarms by nearly 50%, from 39 to only 20 points.
+
+Conclusion: STL + IQR is the winning model. For actual deployment environments (Production), the STL + IQR configuration is more optimal because it helps significantly reduce the phenomenon of "Alert Fatigue" (false alert fatigue) for the system operations team.
+
+- Why Tune IQR Factor to 4.5? (Explanation for raising the IQR threshold to 4.5)
+  - Nature of the data: EC2 Latency data is heavily skewed to the right (Skewness = 3.062) with a very long tail (Heavy right tail). 
+  - Problem with the default threshold ($1.5 x IQR$): The safety zone is too narrow, causing normal load fluctuations at the peak of the cycle to be mistakenly captured, causing 373 False Alarms (Alert Fatigue). 
+  - Solution and Number Meaning 4.5: * Triple the default coefficient ($1.5 x 3 = 4.5$) to help expand the upper threshold range ($Q_3 + 4.5 x IQR$) based on the right skew of the distribution. 
+    - Redefine the problem from detecting "Normal Outliers" to detecting "Extreme Latency Spikes". 
+  - Result: Squeezing the number of false alarms from 373 to only 20, the Precision index increased to 13.04% while Recall remained 100% (catching all 3 real errors).
 
 ---
 
@@ -235,19 +259,6 @@ anomalies = model.predict(X)  # -1 = anomaly, 1 = normal
 
 ## 6. PRODUCTION RECOMMENDATION & REFLECTION
 
-### Why Isolation Forest Over STL+IQR?
-
-| Aspect | STL+IQR | Isolation Forest |
-|--------|---------|-----------------|
-| **Precision** | 0.79% | 7.14% | ❌ 9× worse | ✓ 9× better |
-| **Recall** | 100% | 100% | ✓ Perfect | ✓ Perfect |
-| **False Alarms** | 376 | 15-39 | ❌ Unmanageable | ✓ Manageable |
-| **Interpretability** | High | Medium | ✓ Explainable | ⚠ Black-box |
-| **Scalability** | O(n) | O(n log n) | ✓ Fast | ✓ Fast |
-| **Assumption-free** | No (needs seasonal) | Yes | ⚠ Needs STL | ✓ Distribution-free |
-
-**Verdict:** Isolation Forest is **8-10× better in practice** due to false alarm reduction, critical for production where teams have limited resources.
-
 ### Key Trade-offs
 
 #### **Precision vs Recall**
@@ -291,8 +302,8 @@ anomalies = model.predict(X)  # -1 = anomaly, 1 = normal
 ### Why NOT Choose Other Options?
 
 #### ❌ **Pure Statistical (3σ + STL):**
-- 376 false alarms → Team fatigue, alert noise
-- 0.79% precision → Unreliable for SRE decisions
+- 20 false alarms → Team fatigue, alert noise
+- 13.04% precision → Unreliable for SRE decisions
 - Cannot adapt to new patterns without manual adjustment
 
 #### ❌ **EWMA (Exponential Moving Average):**
@@ -312,7 +323,7 @@ anomalies = model.predict(X)  # -1 = anomaly, 1 = normal
 | Phase | Result | Status |
 |-------|--------|--------|
 | **EDA** | Skewed seasonal data identified | ✓ Complete |
-| **Detector 1 (STL+IQR)** | F1=0.0157, Precision=0.0079 | ✓ Complete |
+| **Detector 1 (STL+IQR)** | F1=0.2308, Precision=0.1304 | ✓ Complete |
 | **Detector 2 (IF)** | F1=0.1333, Precision=0.0714 | ✓ Complete |
 | **Contamination Tuning** | Optimal=0.005 (F1=0.3333) | ✓ Complete |
 | **Bonus 1 (EWMA)** | F1=0.0588 (underperforms) | ✓ Complete |
