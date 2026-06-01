@@ -1,4 +1,4 @@
-<img width="851" height="341" alt="image" src="https://github.com/user-attachments/assets/b8e53038-50ed-4665-8172-4c86badc1466" /># ASSIGNMENT SUBMISSION - ANOMALY DETECTION ON EC2 DATA
+# ASSIGNMENT SUBMISSION - ANOMALY DETECTION ON EC2 DATA
 
 **Date:** June 1, 2026  
 **Dataset:** NAB EC2 Request Latency System Failure  
