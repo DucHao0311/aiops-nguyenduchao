@@ -1,4 +1,4 @@
-# ASSIGNMENT SUBMISSION - ANOMALY DETECTION ON EC2 DATA
+<img width="851" height="341" alt="image" src="https://github.com/user-attachments/assets/b8e53038-50ed-4665-8172-4c86badc1466" /># ASSIGNMENT SUBMISSION - ANOMALY DETECTION ON EC2 DATA
 
 **Date:** June 1, 2026  
 **Dataset:** NAB EC2 Request Latency System Failure  
@@ -18,10 +18,36 @@
   - Min: 22.86 ms
   - Max: 99.25 ms
 
+<img width="410" height="264" alt="image" src="https://github.com/user-attachments/assets/3a9958f7-5f7b-458e-a211-8fb8bf58d31b" />
+
+
 ### Key Findings from EDA
 - **Strong Seasonality:** Detected lag-12 pattern (1-hour cycles)
 - **Outliers Present:** Heavy right tail indicates potential extreme values
 - **Not Normally Distributed:** Skewness > 1 violates normality assumption → Traditional 3σ less effective
+
+Load Dataset
+<img width="1615" height="853" alt="image" src="https://github.com/user-attachments/assets/e3530126-1462-424e-91c7-755fc487909b" />
+
+
+Compute basic statistics
+<img width="522" height="389" alt="image" src="https://github.com/user-attachments/assets/6eaebb00-3367-4905-a0c9-48b20dfd98d3" />
+
+
+PLot Histogram
+<img width="804" height="629" alt="image" src="https://github.com/user-attachments/assets/52d6441d-759b-423a-9251-9b67f441209a" />
+
+
+Data có seasonal ở mức vừa phải, thấy được ở mức lag = 6 hoặc lag=12 (nhưng không rõ ràng lắm).
+Dữ liệu ghi theo bước 5 phút, nên:
+lag = 6 tương ứng với 30 phút.
+lag = 12 tương ứng với 60 phút.
+
+Data thuộc loại skewed, seasonal. 
+Phương pháp phù hợp nhất để detect anomaly là:
+    1. STL Decomposition với period=12, robust=True -> bóc tách chu kỳ.
+    2. Dùng IQR trên residual, đánh dấu bất thường.""")
+<img width="963" height="776" alt="image" src="https://github.com/user-attachments/assets/e7c53a51-3c2f-4a7e-a67e-6982a4ad1197" />
 
 ---
 
@@ -37,6 +63,14 @@
 - **Advantages:** Interpretable, handles seasonality
 - **Disadvantages:** High false positive rate (376 FP), poor precision
 
+Nạp ground_truth
+<img width="1054" height="353" alt="image" src="https://github.com/user-attachments/assets/e7b87b98-c81c-4c49-b666-e9e9fd7cc427" />
+
+Chạy Detector 1
+<img width="1012" height="731" alt="image" src="https://github.com/user-attachments/assets/661e6bf6-816a-4e65-9b4f-6b36524dbf12" />
+
+<img width="985" height="849" alt="image" src="https://github.com/user-attachments/assets/acbba632-8649-49bb-a922-bfbb0dbce02b" />
+
 #### **Detector 2: Isolation Forest (ML-based)**
 - **Rationale:** Robust to non-normal distributions, no assumptions
 - **Setup:**
@@ -44,6 +78,9 @@
   - Model: 200 trees, tuned contamination levels
 - **Advantages:** Better precision-recall trade-off, no distributional assumptions
 - **Disadvantages:** Black-box model, hyperparameter tuning needed
+
+Log output cho Detector 2 chạy với 3 contamination [0.01, 0.02, 0.05]
+<img width="1073" height="882" alt="image" src="https://github.com/user-attachments/assets/de5fc7b1-e7eb-450a-a094-2d850c224571" />
 
 ### Why These Methods?
 1. **Data characteristics demanded non-parametric approach** → Raw 3σ rule too simplistic
@@ -57,21 +94,23 @@
 
 ---
 
-## 3. SCREENSHOTS & VISUALIZATIONS
+## 3. EVALUATION VISUALIZATIONS & COMPARATION
 
-### Screenshot 1: Detector Comparison - Time Series Plots
+### Detector Comparison - Time Series Plots
 **Description:** Three vertically stacked plots showing:
-- **Top:** STL+IQR detected anomalies (red dots) overlaid on EC2 latency curve (blue)
+-  STL+IQR detected anomalies (red dots) overlaid on EC2 latency curve (blue)
   - Anomalies detected: 379
   - Pattern: Concentrated in spikes > 60ms
-- **Middle:** Isolation Forest detected anomalies with best contamination parameter
-  - Anomalies detected: 21 (for contamination=0.01)
+<img width="1056" height="882" alt="image" src="https://github.com/user-attachments/assets/70db365c-e8db-4275-abe0-3f92e34658c4" />
+
+-  Isolation Forest detected anomalies with best contamination parameter
+  - Anomalies detected: 39 (for contamination=0.01)
   - More selective than STL+IQR, fewer false positives
-- **Bottom:** Ground truth anomaly points from NAB (black diamonds)
+-  Ground truth anomaly points from NAB (black diamonds)
   - 3 points total: 2014-03-14, 2014-03-18, 2014-03-21
   - All during system failure events
 
-### Screenshot 2: Comparison Table - Metrics
+### Comparison Table - Metrics
 **Description:** DataFrame showing:
 
 | Detector | Precision | Recall | F1-Score | False Alarms | Anomalies Detected |
@@ -85,23 +124,14 @@
 - IF dramatically reduces false alarms: **90% fewer FP** (39 vs 376)
 - **Winner: Isolation Forest** for production use
 
-### Screenshot 3: Bonus Visualizations
-- **Bonus 1:** 3-method comparison (STL+IQR vs IF vs EWMA)
-  - EWMA: Precision=0.030, Recall=1.0, F1=0.059
-- **Bonus 2:** Log transform impact
-  - Original 3σ: F1=0.30
-  - Log-transformed 3σ: F1=0.25 (16.67% degradation)
-  - Conclusion: Log transform not beneficial for this dataset
-- **Bonus 3:** Multivariate IF (EC2 + CPU + 8 features)
-  - 8 features: ec2_latency, cpu_usage, rolling_mean, rolling_std, rate_of_change (both series)
-  - Multivariate F1=0.0714 vs Univariate F1=0.0723
-  - Multivariate slightly underperforms (-1.19% F1) due to unrelated CPU data
-
 ---
 
 ## 4. CONTAMINATION TUNING LOG
 
 ### Three Tuning Iterations
+
+<img width="1172" height="287" alt="image" src="https://github.com/user-attachments/assets/2e7d636e-0fca-49a5-b5bd-a9df31cd71fb" />
+
 
 #### **Run 1: Contamination = 0.005**
 ```
@@ -149,6 +179,35 @@ Detected Anomalies: 52
   - Lower contamination → Higher precision, higher F1
   - But more conservative (misses borderline anomalies)
   - **Production Choice:** 0.005 due to high precision
+
+---
+
+### Bonus Visualizations
+- **Bonus 1:** 3-method comparison (STL+IQR vs IF vs EWMA)
+  - EWMA: Precision=0.030, Recall=1.0, F1=0.059
+<img width="882" height="867" alt="image" src="https://github.com/user-attachments/assets/a53935b0-dfd4-4a02-895f-8f64454c4e30" />
+
+
+- **Bonus 2:** Log transform impact
+  - Original 3σ: F1=0.30
+  - Log-transformed 3σ: F1=0.25 (16.67% degradation)
+  - Conclusion: Log transform not beneficial for this dataset
+<img width="878" height="891" alt="image" src="https://github.com/user-attachments/assets/c8e8c173-21db-4805-9fc7-fe2ccd51186d" />
+
+- **Bonus 3:** Multivariate IF (EC2 + CPU + 8 features)
+  - 8 features: ec2_latency, cpu_usage, rolling_mean, rolling_std, rate_of_change (both series)
+  - Multivariate F1=0.0714 vs Univariate F1=0.0723
+  - Multivariate slightly underperforms (-1.19% F1) due to unrelated CPU data
+<img width="880" height="486" alt="image" src="https://github.com/user-attachments/assets/6dcee1f7-ece8-4927-9167-1ed22c561241" />
+
+<img width="976" height="852" alt="image" src="https://github.com/user-attachments/assets/a5e88bc1-be54-4ded-a400-c7cbea0d2e2e" />
+
+<img width="976" height="617" alt="image" src="https://github.com/user-attachments/assets/0e5766ab-29fe-445d-a37f-b1bdc0cb35f5" />
+
+<img width="982" height="613" alt="image" src="https://github.com/user-attachments/assets/a2009947-5900-4ec8-96a0-bb13da71839d" />
+
+<img width="851" height="341" alt="image" src="https://github.com/user-attachments/assets/4b9578f5-95ee-4266-85cb-2e22f3ca653a" />
+
 
 ---
 
@@ -267,6 +326,26 @@ anomalies = model.predict(X)  # -1 = anomaly, 1 = normal
 - Monthly retraining on incident-confirmed data
 - Alert clustering to reduce fatigue
 - Regular A/B testing with new methods
+
+---
+
+## 8. Knowledge Check (viết tay)
+
+1. Giải thích skewness là gì, data bị skew thì 3σ sai ở đâu, và 2 cách xử lý khi gặp data skewed?
+
+
+3. So sánh 3σ vs EWMA vs STL: mỗi cái detect loại anomaly nào, fail ở đâu, dùng khi nào?
+
+
+5. Isolation Forest: giải thích ý tưởng “path length ngắn = anomaly”, tại sao cần feature engineering trước khi feed vào?
+
+
+7. Univariate vs Multivariate: cho 1 scenario (VD: memory leak), giải thích tại sao univariate miss và multivariate catch?
+
+
+9. Precision vs Recall: trong AIOps tại sao ưu tiên recall, trade-off gì khi tune threshold?
+
+
 
 ---
 
