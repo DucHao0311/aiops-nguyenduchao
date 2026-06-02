@@ -67,9 +67,9 @@ Nạp ground_truth
 <img width="1054" height="353" alt="image" src="https://github.com/user-attachments/assets/e7b87b98-c81c-4c49-b666-e9e9fd7cc427" />
 
 Chạy Detector 1
-<img width="1012" height="731" alt="image" src="https://github.com/user-attachments/assets/661e6bf6-816a-4e65-9b4f-6b36524dbf12" />
+<img width="1595" height="713" alt="image" src="https://github.com/user-attachments/assets/4578ab40-c53c-495a-8772-09dcabf2d50e" />
 
-<img width="985" height="849" alt="image" src="https://github.com/user-attachments/assets/acbba632-8649-49bb-a922-bfbb0dbce02b" />
+<img width="1009" height="874" alt="image" src="https://github.com/user-attachments/assets/51558217-4655-49c7-a57f-ef83710137a4" />
 
 #### **Detector 2: Isolation Forest (ML-based)**
 - **Rationale:** Robust to non-normal distributions, no assumptions
@@ -101,7 +101,7 @@ Log output cho Detector 2 chạy với 3 contamination [0.01, 0.02, 0.05]
 -  STL+IQR detected anomalies (red dots) overlaid on EC2 latency curve (blue)
   - Anomalies detected: 23
   - Pattern: Concentrated in spikes > 60ms
-<img width="1056" height="882" alt="image" src="https://github.com/user-attachments/assets/70db365c-e8db-4275-abe0-3f92e34658c4" />
+<img width="1024" height="857" alt="image" src="https://github.com/user-attachments/assets/1e050c3d-4e92-44ee-b225-4e93021960bb" />
 
 
 Description: Three vertically stacked plots showing:
@@ -209,7 +209,7 @@ Detected Anomalies: 52
 ### Bonus Visualizations
 - **Bonus 1:** 3-method comparison (STL+IQR vs IF vs EWMA)
   - EWMA: Precision=0.030, Recall=1.0, F1=0.059
-<img width="882" height="867" alt="image" src="https://github.com/user-attachments/assets/a53935b0-dfd4-4a02-895f-8f64454c4e30" />
+<img width="821" height="829" alt="image" src="https://github.com/user-attachments/assets/5531b953-7131-43e2-9707-ea008440d0fb" />
 
 
 - **Bonus 2:** Log transform impact
@@ -343,18 +343,19 @@ anomalies = model.predict(X)  # -1 = anomaly, 1 = normal
 ## 8. Knowledge Check (viết tay)
 
 1. Giải thích skewness là gì, data bị skew thì 3σ sai ở đâu, và 2 cách xử lý khi gặp data skewed?
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/783836bb-12d0-471f-9e90-0adb36af7e86" />
 
+2. So sánh 3σ vs EWMA vs STL: mỗi cái detect loại anomaly nào, fail ở đâu, dùng khi nào?
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/b81a8b9f-98f8-44e1-88a2-da8f7410e44e" />
 
-3. So sánh 3σ vs EWMA vs STL: mỗi cái detect loại anomaly nào, fail ở đâu, dùng khi nào?
+3. Isolation Forest: giải thích ý tưởng “path length ngắn = anomaly”, tại sao cần feature engineering trước khi feed vào?
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/3516c5af-353d-4296-8dfd-6815918484a6" />
 
+4. Univariate vs Multivariate: cho 1 scenario (VD: memory leak), giải thích tại sao univariate miss và multivariate catch?
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/0532ee9b-7f5a-4124-bb54-887a3ab2ceee" />
 
-5. Isolation Forest: giải thích ý tưởng “path length ngắn = anomaly”, tại sao cần feature engineering trước khi feed vào?
-
-
-7. Univariate vs Multivariate: cho 1 scenario (VD: memory leak), giải thích tại sao univariate miss và multivariate catch?
-
-
-9. Precision vs Recall: trong AIOps tại sao ưu tiên recall, trade-off gì khi tune threshold?
+5. Precision vs Recall: trong AIOps tại sao ưu tiên recall, trade-off gì khi tune threshold?
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/2df9b5db-b83a-469d-b496-b58cb2e77ed3" />
 
 
 
