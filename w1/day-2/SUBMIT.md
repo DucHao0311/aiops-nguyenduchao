@@ -7,7 +7,11 @@
 ### 1.1 Load dữ liệu
 
 - **Dataset sử dụng:** HDFS_2k.log (Loghub — HDFS)
+<img width="1548" height="883" alt="image" src="https://github.com/user-attachments/assets/c11e10b2-df8c-4416-b0ce-13e301545f8e" />
+
 - **Tổng số dòng log đọc được:** 2000
+<img width="1087" height="326" alt="image" src="https://github.com/user-attachments/assets/7be83dee-987c-41f3-832f-23c84d02d9f3" />
+
 
 ### 1.2 Parse toàn bộ log với Drain3
 
@@ -18,6 +22,8 @@ Cấu hình tối ưu được chọn:
 
 **Kết quả:**
 - Số lượng template độc nhất tìm thấy: **21 templates**
+<img width="1400" height="296" alt="image" src="https://github.com/user-attachments/assets/2c08caa1-2c7e-47e5-92d9-ed1e23386bf9" />
+
 
 ### 1.3 Top-10 Templates (export ra `results/top_templates.csv`)
 
@@ -29,6 +35,8 @@ Cấu hình tối ưu được chọn:
 | T-3 | `<*> <*> <*> INFO dfs.DataNode$PacketResponder: Received block <*> of size <*> from <*>` | 292 |
 | T-7 | `<*> <*> <*> INFO dfs.FSDataset: Deleting block <*> file <*>` | 263 |
 | ... | *(xem file results/top_templates.csv để xem đầy đủ)* | ... |
+<img width="1351" height="406" alt="image" src="https://github.com/user-attachments/assets/bacc21e8-64d4-4e82-82ed-342860ffa52b" />
+
 
 ### 1.4 Tuning `drain_sim_th`
 
@@ -37,6 +45,8 @@ Cấu hình tối ưu được chọn:
 | 0.3 | 17 |
 | **0.5** | **21** |
 | 0.7 | 820 |
+<img width="741" height="277" alt="image" src="https://github.com/user-attachments/assets/cbcfaa0d-9300-4528-bc32-fa21a30c0dd4" />
+
 
 **Nhận xét:**
 - `sim_th = 0.3`: Ngưỡng thấp → Drain3 gộp nhiều log thành cùng template → chỉ ra 17 template, quá tổng quát, mất chi tiết.
@@ -55,6 +65,7 @@ Cấu hình tối ưu được chọn:
 - Bảng time series có shape: `(N_windows, 21_templates)`
 
 ### 2.2 Anomaly Detection — 3σ Spike + WARN Signal (tối ưu)
+<img width="859" height="409" alt="image" src="https://github.com/user-attachments/assets/0b532c68-261b-46ae-9c4b-3a1ba4a9bfa6" />
 
 Strategy 2 signal kết hợp OR:
 - **Signal 1 — 3σ count spike:** window có tổng log > mean + 3×std
@@ -83,7 +94,8 @@ Strategy 2 signal kết hợp OR:
 
 ### 2.3 Biểu đồ Template Count Time Series + Anomaly (cải tiến)
 
-> **[ẢNH]** Chèn ảnh chụp màn hình biểu đồ 2 subplot từ `results/hdfs_anomaly_detection.png`:
+<img width="1447" height="871" alt="image" src="https://github.com/user-attachments/assets/bd7fd597-3cf2-4434-b0ec-7aa7a6742289" />
+
 > - **Subplot trên:** đường log count/5min (xanh), đường 3σ (cam nét đứt), đường mean (xanh lá),
 >   tam giác đỏ = count spike, chấm cam = WARN anomaly
 > - **Subplot dưới:** bar chart WARN log count/5min (đỏ) — thấy rõ các cụm WARN rải rác
@@ -101,7 +113,8 @@ Strategy 2 signal kết hợp OR:
 
 **Kết quả phân cụm tiêu biểu:**
 
-> **[ẢNH]** Chèn ảnh chụp màn hình heatmap từ `results/template_similarity_matrix.png`:
+<img width="1007" height="858" alt="image" src="https://github.com/user-attachments/assets/dffcd249-1c0d-4f12-9afc-09ecca9f1050" />
+
 > - Ma trận 21×21, màu càng đậm (vàng/đỏ) = similarity càng cao
 > - Các nhóm có màu đậm theo đường chéo = cluster template tương đồng
 
@@ -109,6 +122,8 @@ Ví dụ nhóm cluster điển hình:
 - **Cluster "Block transfer"**: T-2, T-3, T-4 (addStoredBlock, Received block, Receiving block) — các log liên quan vận chuyển block
 - **Cluster "Packet Responder"**: T-1, T-5 — log PacketResponder terminating/serving
 - **Cluster "Deletion/cleanup"**: T-7, T-8 — log xóa block, file cleanup
+<img width="991" height="735" alt="image" src="https://github.com/user-attachments/assets/f20ed735-0474-4292-a18f-ea753160f9de" />
+
 
 ### 3.2 Inject Dòng Log "Lạ" → New Template Detection
 
@@ -116,6 +131,8 @@ Ví dụ nhóm cluster điển hình:
 ```
 2008110 120000 WARN custom.FakeService: DISK_ERROR sector 99 corrupt, remapping failed at block 0xDEADBEEF
 ```
+
+<img width="1311" height="247" alt="image" src="https://github.com/user-attachments/assets/187181ec-e3ce-4256-ae71-74451ecc172e" />
 
 **Kết quả:**
 - Số template TRƯỚC khi inject: **21**
@@ -137,6 +154,9 @@ Script nhận 1 argument là đường dẫn log file, output ra stdout:
 python log_analyzer.py <logfile>
 ```
 
+<img width="1843" height="831" alt="image" src="https://github.com/user-attachments/assets/f6a89bdb-6861-4bb3-93e4-53dfeb90a6fd" />
+
+
 **Các thông tin output:**
 1. Tổng số dòng, số template unique
 2. Top-5 template (count + % tổng)
@@ -144,6 +164,8 @@ python log_analyzer.py <logfile>
 4. New templates chưa xuất hiện trước 1 giờ gần nhất
 
 ### 4.2 Test Script trên HDFS Dataset
+<img width="1254" height="466" alt="image" src="https://github.com/user-attachments/assets/4bc991c8-197b-4978-8a61-5353fff3ab0d" />
+
 
 ```
 ==============================================================
@@ -166,9 +188,9 @@ Unique templates: 21
 ==============================================================
 ```
 
-> **[ẢNH]** Chèn ảnh chụp màn hình terminal khi chạy: `python log_analyzer.py HDFS\HDFS_2k.log`
-
 ### 4.3 Test Script trên BGL Dataset
+<img width="1209" height="462" alt="image" src="https://github.com/user-attachments/assets/f7177296-6140-4c47-8cb1-a9850109d17e" />
+
 
 ```
 ==============================================================
@@ -191,7 +213,6 @@ Unique templates: 151
 ==============================================================
 ```
 
-> **[ẢNH]** Chèn ảnh chụp màn hình terminal khi chạy: `python log_analyzer.py BGL\BGL_2k.log`
 
 ### 4.4 So sánh HDFS vs BGL
 
@@ -257,3 +278,22 @@ Unique templates: 151
 | **Kết hợp** | Metric anomaly ↔ Log spike xảy ra cùng lúc → độ tin cậy cao hơn nhiều | |
 
 **Kết luận:** Log-based anomaly detection bổ sung cho metric-based: khi metric phát hiện anomaly, log cho biết **cái gì** đang xảy ra bên trong hệ thống.
+
+## Knowledge Check (viết tay)
+
+1. Giải thích Drain3 parse tree hoạt động thế nào (vẽ sơ đồ đơn giản).
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/85ab1719-cf4a-49c0-87dd-677e24f6210d" />
+
+2. Tại sao cần log parsing thay vì grep — cho ví dụ cụ thể.
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/47d52228-6cb5-4ec3-b1a6-b30b6f882080" />
+
+3. Template count time series là gì, tại sao dùng nó để detect anomaly.
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/c651fbfa-a49e-4053-9e53-0e0720624b52" />
+
+4. New template detection: tại sao template mới là signal quan trọng.
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/d8cff07f-d97f-4557-8312-27fbf70eb0dd" />
+
+5. Metric cho biết gì, log cho biết gì, kết hợp 2 cái thì được gì.
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/5367de10-aacb-4983-ae85-9def1b652ff8" />
+
+
