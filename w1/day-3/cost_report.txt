@@ -1,0 +1,132 @@
+===============================================================================================
+  AIOps Platform — Monthly Cost Estimation (USD)
+  Use case: Anomaly Detection on Payment Service
+  Comparison: Self-Host OSS Stack  vs  Datadog SaaS
+===============================================================================================
+
+───────────────────────────────────────────────────────────────────────────────────────────────
+  TIER: SMALL
+  Config: 10 services | 50 GB log/day | 100,000 events/sec
+───────────────────────────────────────────────────────────────────────────────────────────────
+  Component                                  Category    Self-Host $    Datadog $
+───────────────────────────────────────────────────────────────────────────────────────────────
+  ── COMPUTE..................................                                     
+  Kafka cluster (transport)                  compute    $       600   $        0
+  Flink (stream processing)                  compute    $       300   $        0
+  VictoriaMetrics (TSDB)                     compute    $        80   $        0
+  Grafana Loki (log ingester)                compute    $       180   $        0
+  OTel Collectors                            compute    $        50   $        0
+  ML Inference + MLflow                      compute    $       180   $        0
+  Grafana OSS                                compute    $        40   $        0
+  Datadog Infra (per host)                   compute    $         0   $      340
+  Datadog APM (per host)                     compute    $         0   $      310
+    Subtotal — compute                                  $     1,430   $      650
+
+  ── STORAGE..................................                                     
+  Log storage (hot 30d + cold 90d)           storage    $       150   $        0
+  Metric storage (TSDB 90d)                  storage    $         8   $        0
+  Trace storage (sampled 7d)                 storage    $        11   $        0
+  Model artifacts + Kafka tiered             storage    $       293   $        0
+  Datadog Log Ingest                         storage    $         0   $      150
+  Datadog Log Retention (15d)                storage    $         0   $    1,275
+    Subtotal — storage                                  $       462   $    1,425
+
+  ── NETWORK..................................                                     
+  Network egress (self-host)                 network    $        12   $        0
+    Subtotal — network                                  $        12   $        0
+
+───────────────────────────────────────────────────────────────────────────────────────────────
+  GRAND TOTAL                                           $     1,904   $    2,075
+───────────────────────────────────────────────────────────────────────────────────────────────
+  Build vs Buy: self-host saves  $       171/month  (8% cheaper)   —   $2,050/year
+
+───────────────────────────────────────────────────────────────────────────────────────────────
+  TIER: MEDIUM
+  Config: 100 services | 500 GB log/day | 1,000,000 events/sec
+───────────────────────────────────────────────────────────────────────────────────────────────
+  Component                                  Category    Self-Host $    Datadog $
+───────────────────────────────────────────────────────────────────────────────────────────────
+  ── COMPUTE..................................                                     
+  Kafka cluster (transport)                  compute    $     1,200   $        0
+  Flink (stream processing)                  compute    $       750   $        0
+  VictoriaMetrics (TSDB)                     compute    $        80   $        0
+  Grafana Loki (log ingester)                compute    $     1,500   $        0
+  OTel Collectors                            compute    $       500   $        0
+  ML Inference + MLflow                      compute    $       180   $        0
+  Grafana OSS                                compute    $        40   $        0
+  Datadog Infra (per host)                   compute    $         0   $    3,400
+  Datadog APM (per host)                     compute    $         0   $    3,100
+    Subtotal — compute                                  $     4,250   $    6,500
+
+  ── STORAGE..................................                                     
+  Log storage (hot 30d + cold 90d)           storage    $     1,500   $        0
+  Metric storage (TSDB 90d)                  storage    $        77   $        0
+  Trace storage (sampled 7d)                 storage    $       113   $        0
+  Model artifacts + Kafka tiered             storage    $     2,929   $        0
+  Datadog Log Ingest                         storage    $         0   $    1,500
+  Datadog Log Retention (15d)                storage    $         0   $   12,750
+    Subtotal — storage                                  $     4,619   $   14,250
+
+  ── NETWORK..................................                                     
+  Network egress (self-host)                 network    $       120   $        0
+    Subtotal — network                                  $       120   $        0
+
+───────────────────────────────────────────────────────────────────────────────────────────────
+  GRAND TOTAL                                           $     8,989   $   20,750
+───────────────────────────────────────────────────────────────────────────────────────────────
+  Build vs Buy: self-host saves  $    11,761/month  (57% cheaper)   —   $141,130/year
+
+───────────────────────────────────────────────────────────────────────────────────────────────
+  TIER: LARGE
+  Config: 1000 services | 5120 GB log/day | 10,000,000 events/sec
+───────────────────────────────────────────────────────────────────────────────────────────────
+  Component                                  Category    Self-Host $    Datadog $
+───────────────────────────────────────────────────────────────────────────────────────────────
+  ── COMPUTE..................................                                     
+  Kafka cluster (transport)                  compute    $    12,000   $        0
+  Flink (stream processing)                  compute    $     7,500   $        0
+  VictoriaMetrics (TSDB)                     compute    $       800   $        0
+  Grafana Loki (log ingester)                compute    $    15,360   $        0
+  OTel Collectors                            compute    $     5,000   $        0
+  ML Inference + MLflow                      compute    $       180   $        0
+  Grafana OSS                                compute    $        40   $        0
+  Datadog Infra (per host)                   compute    $         0   $   34,000
+  Datadog APM (per host)                     compute    $         0   $   31,000
+    Subtotal — compute                                  $    40,880   $   65,000
+
+  ── STORAGE..................................                                     
+  Log storage (hot 30d + cold 90d)           storage    $    15,360   $        0
+  Metric storage (TSDB 90d)                  storage    $       772   $        0
+  Trace storage (sampled 7d)                 storage    $     1,127   $        0
+  Model artifacts + Kafka tiered             storage    $    29,290   $        0
+  Datadog Log Ingest                         storage    $         0   $   15,360
+  Datadog Log Retention (15d)                storage    $         0   $  130,560
+    Subtotal — storage                                  $    46,549   $  145,920
+
+  ── NETWORK..................................                                     
+  Network egress (self-host)                 network    $     1,229   $        0
+    Subtotal — network                                  $     1,229   $        0
+
+───────────────────────────────────────────────────────────────────────────────────────────────
+  GRAND TOTAL                                           $    88,658   $  210,920
+───────────────────────────────────────────────────────────────────────────────────────────────
+  Build vs Buy: self-host saves  $   122,262/month  (58% cheaper)   —   $1,467,147/year
+
+===============================================================================================
+  SUMMARY — Build vs Buy across all tiers
+───────────────────────────────────────────────────────────────────────────────────────────────
+  Tier      Services   Log GB/d    Events/sec   Self-Host $   Datadog $    Saving $    Annual $
+───────────────────────────────────────────────────────────────────────────────────────────────
+  Small           10         50       100,000 $      1,904   $    2,075   $      171   $    2,050
+  Medium         100        500     1,000,000 $      8,989   $   20,750   $   11,761   $  141,130
+  Large        1,000      5,120    10,000,000 $     88,658   $  210,920   $  122,262   $1,467,147
+===============================================================================================
+
+  Assumptions:
+  · Self-host prices: GCP on-demand (no CUD); includes 1.5× ops overhead
+    (monitoring, on-call rotation, patching, incident response).
+  · Datadog: public list price 2024; enterprise contracts typically
+    20–40% lower. Custom metrics estimated at 50/service.
+  · Kafka tiered storage on GCS; Loki object backend on GCS.
+  · Trace sampling at 1%; metric compression ratio 10:1 (VictoriaMetrics).
+  · Network: 10% of log volume exits region (cross-region replication).
