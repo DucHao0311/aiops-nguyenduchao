@@ -13,6 +13,7 @@
 `pipeline.py` mô phỏng một **streaming pipeline** theo mô hình producer/consumer, dùng `queue.Queue` làm fake Kafka topic. Kiến trúc phản ánh cách Flink/Spark Streaming hoạt động ở scale lớn — chỉ khác ở transport layer (queue thay vì Kafka broker thật).
 
 **Data source**: `realKnownCause/machine_temperature_system_failure.csv` (NAB dataset, 22,695 rows, 5-min granularity từ 2013-12 đến 2014-02).
+<img width="652" height="572" alt="image" src="https://github.com/user-attachments/assets/b9cf1dcb-53bb-41c4-9463-50ffdbe66b17" />
 
 **Luồng xử lý**:
 
@@ -54,6 +55,8 @@ Các feature được tính **online per event** dùng `collections.deque(maxlen
 **Output files**:
 - `features.parquet` — 22,695 rows × 8 columns, 1.7 MB
 - `events.jsonl` — 22,695 raw events (1 JSON object/line, simulate Kafka topic log)
+<img width="1061" height="493" alt="image" src="https://github.com/user-attachments/assets/b52146f6-8a96-49f1-9558-72ae91ecb633" />
+
 
 **Chạy**:
 ```bash
@@ -62,45 +65,7 @@ python pipeline.py
 ```
 
 ### Kết quả
-
-```
-=======================================================
-  AIOps Mock Streaming Pipeline
-  Use case: Payment Service Anomaly Detection
-=======================================================
-[Producer] Starting — reading realKnownCause\machine_temperature_system_failure.csv
-[Consumer] Starting — waiting for events…
-[Consumer] Processed 5000 events…
-[Consumer] Processed 10000 events…
-[Consumer] Processed 15000 events…
-[Consumer] Processed 20000 events…
-[Producer] Done — emitted 22695 events
-[Consumer] Done — 22695 events → features.parquet
-
-               timestamp      value  rolling_mean_12   z_score  rate_of_change
-22690 2014-02-19 15:05:00  98.185415        97.050779  1.394956        0.008469
-22691 2014-02-19 15:10:00  97.804168        97.238123  0.810616       -0.003883
-22692 2014-02-19 15:15:00  97.135468        97.324114 -0.308541       -0.006837
-22693 2014-02-19 15:20:00  98.056852        97.498760  1.155563        0.009486
-22694 2014-02-19 15:25:00  96.903861        97.427342 -1.042970       -0.011758
-
-Schema:
-timestamp          datetime64[ns]
-value                     float64
-rolling_mean_12           float64
-rolling_std_12            float64
-rolling_mean_60           float64
-rolling_std_60            float64
-rate_of_change            float64
-z_score                   float64
-
-Output size: 1736.4 KB
-✓ Pipeline finished in 4.09s
-```
-
-### Screenshot
-
-<Screenshot — terminal output của pipeline.py: producer/consumer threads, processed events log, tail 5 rows của features dataframe với các cột timestamp/value/rolling_mean_12/z_score/rate_of_change, schema, output size và thời gian chạy>
+<img width="930" height="842" alt="image" src="https://github.com/user-attachments/assets/c55ee46c-c500-4ee0-8a3e-b7659ba098f3" />
 
 ---
 
@@ -135,18 +100,8 @@ Kiến trúc E2E data layer cho use case **Anomaly Detection on Payment Service*
 | Feature Store | Redis + Feast | Online feature serving <1ms |
 | Visualization | Grafana | Unified: metric + log + trace + anomaly score |
 
-**Gen diagram**:
-```bash
-python gen_architecture.py   # output: architecture.png
-```
-
-### Kết quả
-
-File `architecture.png` generated bởi Python `diagrams` library (Graphviz backend), 330 KB.
-
-### Screenshot
-
-<Screenshot — architecture.png: sơ đồ E2E AIOps data layer với 6 layer (Service Mesh → OTel Collector → Kafka topics → Flink stream / Spark batch → Storage cluster → Grafana / ML API / MLflow), các mũi tên màu phân biệt loại data flow (metric/log/trace/alert)>
+**Gen diagram** hoặc xem dạng .md **architecture.md**:
+<img width="2183" height="3059" alt="image" src="https://github.com/user-attachments/assets/cb048d0b-34d5-4458-8ea2-663b55426f16" />
 
 ---
 
@@ -178,85 +133,19 @@ python cost_model.py   # output: cost_report.txt
 
 #### Tier SMALL — 10 services | 50 GB log/day | 100,000 events/sec
 
-| Category | Component | Self-Host $/month | Datadog $/month |
-|----------|-----------|------------------:|----------------:|
-| **compute** | Kafka cluster (transport) | $600 | — |
-| compute | Flink (stream processing) | $300 | — |
-| compute | VictoriaMetrics (TSDB) | $80 | — |
-| compute | Grafana Loki (log ingester) | $180 | — |
-| compute | OTel Collectors | $50 | — |
-| compute | ML Inference + MLflow | $180 | — |
-| compute | Grafana OSS | $40 | — |
-| compute | Datadog Infra (per host) | — | $340 |
-| compute | Datadog APM (per host) | — | $310 |
-| | **Subtotal compute** | **$1,430** | **$650** |
-| **storage** | Log storage (hot 30d + cold 90d) | $150 | — |
-| storage | Metric storage (TSDB 90d) | $8 | — |
-| storage | Trace storage (sampled 7d) | $11 | — |
-| storage | Model artifacts + Kafka tiered | $293 | — |
-| storage | Datadog Log Ingest | — | $150 |
-| storage | Datadog Log Retention (15d) | — | $1,275 |
-| | **Subtotal storage** | **$462** | **$1,425** |
-| **network** | Network egress | $12 | $0 (included) |
-| | **Subtotal network** | **$12** | **$0** |
-| | **GRAND TOTAL** | **$1,904** | **$2,075** |
-| | **Build vs Buy** | **Self-host saves $171/month (8% cheaper) — $2,050/year** | |
+<img width="1135" height="942" alt="image" src="https://github.com/user-attachments/assets/014126c7-c9cb-41ab-9ee1-8f820f015565" />
 
 ---
 
 #### Tier MEDIUM — 100 services | 500 GB log/day | 1,000,000 events/sec
 
-| Category | Component | Self-Host $/month | Datadog $/month |
-|----------|-----------|------------------:|----------------:|
-| **compute** | Kafka cluster | $1,200 | — |
-| compute | Flink | $750 | — |
-| compute | VictoriaMetrics | $80 | — |
-| compute | Grafana Loki | $1,500 | — |
-| compute | OTel Collectors | $500 | — |
-| compute | ML Inference + MLflow | $180 | — |
-| compute | Grafana OSS | $40 | — |
-| compute | Datadog Infra | — | $3,400 |
-| compute | Datadog APM | — | $3,100 |
-| | **Subtotal compute** | **$4,250** | **$6,500** |
-| **storage** | Log storage (hot+cold) | $1,500 | — |
-| storage | Metric storage | $77 | — |
-| storage | Trace storage | $113 | — |
-| storage | Model artifacts + Kafka tiered | $2,929 | — |
-| storage | Datadog Log Ingest | — | $1,500 |
-| storage | Datadog Log Retention (15d) | — | $12,750 |
-| | **Subtotal storage** | **$4,619** | **$14,250** |
-| **network** | Network egress | $120 | $0 (included) |
-| | **Subtotal network** | **$120** | **$0** |
-| | **GRAND TOTAL** | **$8,989** | **$20,750** |
-| | **Build vs Buy** | **Self-host saves $11,761/month (57% cheaper) — $141,130/year** | |
+<img width="1144" height="863" alt="image" src="https://github.com/user-attachments/assets/ce4c7cbd-17e8-45f0-b9aa-5bade00dea18" />
 
 ---
 
 #### Tier LARGE — 1,000 services | 5,120 GB log/day | 10,000,000 events/sec
 
-| Category | Component | Self-Host $/month | Datadog $/month |
-|----------|-----------|------------------:|----------------:|
-| **compute** | Kafka cluster | $12,000 | — |
-| compute | Flink | $7,500 | — |
-| compute | VictoriaMetrics | $800 | — |
-| compute | Grafana Loki | $15,360 | — |
-| compute | OTel Collectors | $5,000 | — |
-| compute | ML Inference + MLflow | $180 | — |
-| compute | Grafana OSS | $40 | — |
-| compute | Datadog Infra | — | $34,000 |
-| compute | Datadog APM | — | $31,000 |
-| | **Subtotal compute** | **$40,880** | **$65,000** |
-| **storage** | Log storage (hot+cold) | $15,360 | — |
-| storage | Metric storage | $772 | — |
-| storage | Trace storage | $1,127 | — |
-| storage | Model artifacts + Kafka tiered | $29,290 | — |
-| storage | Datadog Log Ingest | — | $15,360 |
-| storage | Datadog Log Retention (15d) | — | $130,560 |
-| | **Subtotal storage** | **$46,549** | **$145,920** |
-| **network** | Network egress | $1,229 | $0 (included) |
-| | **Subtotal network** | **$1,229** | **$0** |
-| | **GRAND TOTAL** | **$88,658** | **$210,920** |
-| | **Build vs Buy** | **Self-host saves $122,262/month (58% cheaper) — $1,467,147/year** | |
+<img width="1114" height="825" alt="image" src="https://github.com/user-attachments/assets/c86d063d-21c3-48ac-825d-994a7f382b95" />
 
 ---
 
@@ -271,10 +160,6 @@ python cost_model.py   # output: cost_report.txt
 > Self-host: GCP on-demand + 1.5× ops overhead. Datadog: public list price 2024, enterprise discounts 20–40% không tính vào.
 > Tại Small tier, self-host chỉ rẻ hơn 8% — **lợi thế không đáng kể** khi tính thêm ops cost thực tế.
 > Tại Medium/Large, self-host tiết kiệm 57–58% — **ROI rõ ràng** khi có SRE team đủ lớn.
-
-### Screenshot
-
-<Screenshot — terminal output của cost_model.py: 3 tier breakdown có subtotal theo compute/storage/network, build vs buy saving cho từng tier, summary table cuối>
 
 ---
 
@@ -331,9 +216,7 @@ Format: Michael Nygard (Status → Context → Decision → Consequences → Alt
 
 Chi tiết đầy đủ: [`ADR-001.md`](./ADR-001.md)
 
-### Screenshot
-
-<Screenshot — ADR-001.md mở trong editor: hiển thị phần Status, Context (bảng options comparison), Decision, Consequences (bảng quantified trade-offs), Alternatives Considered>
+<img width="1145" height="955" alt="image" src="https://github.com/user-attachments/assets/367ef3f3-2bc4-4d1b-8b01-2218d3b797e4" />
 
 ---
 
