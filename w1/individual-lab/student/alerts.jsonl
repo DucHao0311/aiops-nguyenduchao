@@ -1,0 +1,15 @@
+{"timestamp": "2026-06-05T09:51:24.491+00:00", "type": "dependency_timeout", "severity": "warning", "message": "Dependency timeout detected: upstream timeout rate=11.9%"}
+{"timestamp": "2026-06-05T09:52:14.830+00:00", "type": "traffic_spike", "severity": "critical", "message": "Traffic spike detected: queue depth=55, P99 latency=1515ms"}
+{"timestamp": "2026-06-05T09:52:14.830+00:00", "type": "dependency_timeout", "severity": "critical", "message": "Dependency timeout detected: upstream timeout rate=44.2%, 5xx rate=24.1% (baseline=7.2%), P99 latency=1515ms, circuit breaker OPEN in logs"}
+{"timestamp": "2026-06-05T09:53:05.108+00:00", "type": "traffic_spike", "severity": "critical", "message": "Traffic spike detected: queue depth=95, P99 latency=2771ms"}
+{"timestamp": "2026-06-05T09:53:05.108+00:00", "type": "dependency_timeout", "severity": "critical", "message": "Dependency timeout detected: upstream timeout rate=77.7%, 5xx rate=35.5% (baseline=23.5%), P99 latency=2771ms, circuit breaker OPEN in logs"}
+{"timestamp": "2026-06-05T09:53:55.439+00:00", "type": "traffic_spike", "severity": "critical", "message": "Traffic spike detected: queue depth=83, P99 latency=2351ms"}
+{"timestamp": "2026-06-05T09:53:55.439+00:00", "type": "dependency_timeout", "severity": "critical", "message": "Dependency timeout detected: upstream timeout rate=79.9%, 5xx rate=35.4% (baseline=35.6%), P99 latency=2351ms, circuit breaker OPEN in logs"}
+{"timestamp": "2026-06-05T09:54:45.711+00:00", "type": "traffic_spike", "severity": "critical", "message": "Traffic spike detected: queue depth=85, P99 latency=2252ms"}
+{"timestamp": "2026-06-05T09:54:45.711+00:00", "type": "dependency_timeout", "severity": "critical", "message": "Dependency timeout detected: upstream timeout rate=79.8%, 5xx rate=34.7% (baseline=36.7%), P99 latency=2252ms, circuit breaker OPEN in logs"}
+{"timestamp": "2026-06-05T09:55:35.922+00:00", "type": "traffic_spike", "severity": "critical", "message": "Traffic spike detected: queue depth=71, P99 latency=2524ms"}
+{"timestamp": "2026-06-05T09:55:35.922+00:00", "type": "dependency_timeout", "severity": "critical", "message": "Dependency timeout detected: upstream timeout rate=74.9%, 5xx rate=40.5% (baseline=35.7%), P99 latency=2524ms, circuit breaker OPEN in logs"}
+{"timestamp": "2026-06-05T09:56:26.216+00:00", "type": "traffic_spike", "severity": "critical", "message": "Traffic spike detected: queue depth=85, P99 latency=2609ms"}
+{"timestamp": "2026-06-05T09:56:26.216+00:00", "type": "dependency_timeout", "severity": "critical", "message": "Dependency timeout detected: upstream timeout rate=70.9%, 5xx rate=42.7% (baseline=37.0%), P99 latency=2609ms, circuit breaker OPEN in logs"}
+{"timestamp": "2026-06-05T09:57:16.464+00:00", "type": "traffic_spike", "severity": "critical", "message": "Traffic spike detected: queue depth=81, P99 latency=2623ms"}
+{"timestamp": "2026-06-05T09:57:16.464+00:00", "type": "dependency_timeout", "severity": "critical", "message": "Dependency timeout detected: upstream timeout rate=79.7%, 5xx rate=37.2% (baseline=37.0%), P99 latency=2623ms, circuit breaker OPEN in logs"}
