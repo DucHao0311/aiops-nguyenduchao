@@ -1,0 +1,472 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "baseline_source": "coroot-dump (production microservices chaos engineering snapshot)",
+    "topology_chain_frontend": ["bb-edge", "roc-installment-service", "bb-confirmation-service", "roc-user-manager-service"],
+    "topology_chain_backend": ["datapower", "esb", "t24-service"],
+    "baselines": {
+      "bb-edge": {"rps": 3.0, "latency_p50_ms": 10, "latency_p99_ms": 1000, "error_rate": 0.001, "cpu_cores": 0.02, "mem_mb": 176},
+      "roc-installment-service": {"rps": 4.4, "latency_p50_ms": 5, "latency_p99_ms": 960, "error_rate": 0.0, "cpu_cores": 0.06, "mem_mb": 1190},
+      "datapower": {"rps": 7.6, "latency_p50_ms": 290, "latency_p99_ms": 930, "error_rate": 0.0, "cpu_cores": 0.02, "mem_mb": 146},
+      "esb": {"rps": 12.4, "latency_p50_ms": 300, "latency_p99_ms": 900, "error_rate": 0.0, "cpu_cores": 0.06, "mem_mb": 270},
+      "t24-service": {"rps": 25.0, "latency_p50_ms": 80, "latency_p99_ms": 450, "error_rate": 0.0, "cpu_cores": 0.15, "mem_mb": 850}
+    },
+    "phase_durations_min": {"pre": 15, "active": 15, "post": 10, "recovery": 5}
+  },
+  "scenarios": [
+    {
+      "id": "S01",
+      "name": "ESB connection pool exhaustion",
+      "block": "hour1_detect",
+      "root_cause": "esb_db_pool_size_too_small_for_t24_latency",
+      "root_service": "esb",
+      "cascade_path": ["t24-service", "esb", "datapower"],
+      "narrative": "T24 core service response times slowly creep up (60 → 180ms p50). ESB holds connections longer waiting for T24 responses; connection pool saturates at ~70% utilization. Once pool is full, ESB starts queueing requests; queue depth grows linearly. Eventually p99 crosses 2s threshold and alerts fire on ESB. Datapower (calls ESB) inherits the latency.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "t24-service", "metric": "latency_p50_ms", "drift_pct": 50, "noise": 0.1},
+          {"service": "esb", "metric": "conn_pool_used", "drift_value": "30->68/100", "noise": 0.05}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "esb", "metric": "latency_p99_ms", "drift_pct": 220},
+          {"service": "esb", "metric": "queue_depth", "drift_value": "0->400"},
+          {"service": "esb", "metric": "error_rate", "drift_pct": 8000},
+          {"service": "datapower", "metric": "latency_p99_ms", "drift_pct": 130, "delay_min": 3},
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 5000, "delay_min": 5}
+        ], "alerts": [
+          {"t_offset_sec": 60, "rule": "latency-p99-high", "service": "esb", "severity": "warning"},
+          {"t_offset_sec": 180, "rule": "queue-saturation", "service": "esb", "severity": "critical"},
+          {"t_offset_sec": 300, "rule": "latency-p99-high", "service": "datapower", "severity": "warning"}
+        ], "log_patterns": [
+          {"service": "esb", "count": 45, "pattern": "ConnectionPool: timeout acquiring connection (waited 5000ms)"},
+          {"service": "esb", "count": 12, "pattern": "Failed to forward request to t24-service: pool exhausted"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "esb", "metric": "latency_p99_ms", "drift_pct": 180},
+          {"service": "esb", "metric": "error_rate", "drift_pct": 6000}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "increase esb db_pool_size 100 -> 250", "signals": [
+          {"service": "esb", "metric": "latency_p99_ms", "drift_pct": 0, "recover": true},
+          {"service": "datapower", "metric": "latency_p99_ms", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "esb",
+        "top_metric": "conn_pool_used",
+        "explanation": "ESB conn_pool_used crossed 70% before any alert fired. T24 latency drift is the upstream trigger, ESB is where saturation happens.",
+        "pagerank_winner": "esb",
+        "topology_evidence": "datapower depends on esb, both degraded; t24 is leaf, only its latency drifted (not error)"
+      },
+      "discussion_prompts": [
+        "Tại sao alert fire trên ESB nhưng root cause có thể là T24?",
+        "Nếu chỉ nhìn alert feed (không nhìn topology), bạn sẽ remediate sai như thế nào?",
+        "Pool saturation tăng linear trong 15' — anomaly detector nào (3σ, IsolationForest, LSTM) catch được sớm nhất?"
+      ]
+    },
+    {
+      "id": "S02",
+      "name": "DataPower DNS NXDOMAIN burst",
+      "block": "hour1_detect",
+      "root_cause": "coredns_upstream_misconfig_returns_nxdomain_for_internal_svc",
+      "root_service": "coredns",
+      "cascade_path": ["coredns", "datapower", "esb"],
+      "narrative": "K8s cluster's CoreDNS reload picks up a bad upstream config. NXDOMAIN responses spike for `esb.svc.cluster.local`. Datapower (calls ESB by service name) sees DNS resolution fail, retries with exponential backoff, latency explodes. ESB is healthy but unreachable from datapower's POV.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "datapower", "metric": "dns_nxdomain_count", "drift_value": "0->2/min", "noise": 0.5}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "datapower", "metric": "dns_nxdomain_count", "drift_value": "0->150/min"},
+          {"service": "datapower", "metric": "latency_p99_ms", "drift_pct": 400},
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 9000}
+        ], "alerts": [
+          {"t_offset_sec": 30, "rule": "dns-nxdomain-errors", "service": "datapower", "severity": "warning"},
+          {"t_offset_sec": 120, "rule": "latency-p99-high", "service": "datapower", "severity": "critical"}
+        ], "log_patterns": [
+          {"service": "datapower", "count": 240, "pattern": "DNS resolution failed for esb.svc.cluster.local: NXDOMAIN"},
+          {"service": "datapower", "count": 60, "pattern": "Retry exhausted after 5 attempts, returning 503 to client"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 7000}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "rollback coredns configmap to last known good", "signals": [
+          {"service": "datapower", "metric": "dns_nxdomain_count", "drift_pct": 0, "recover": true},
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "coredns_or_cluster_dns",
+        "top_metric": "dns_nxdomain_count",
+        "explanation": "ESB metrics show NO degradation — pure infra failure. RCA must look at infra layer, not just app layer.",
+        "pagerank_winner": "datapower",
+        "topology_evidence": "ESB perfectly healthy from its own view; datapower → esb edge is the broken hop"
+      },
+      "discussion_prompts": [
+        "PageRank trên service topology không tìm được CoreDNS — vì sao? Cần extension nào?",
+        "Khi nào nên trust ESB self-report 'healthy' vs Datapower's 'esb unreachable'?",
+        "Anti-pattern: nếu remediate bằng cách restart ESB sẽ thế nào?"
+      ]
+    },
+    {
+      "id": "S03",
+      "name": "ROC python GIL contention spike",
+      "block": "hour1_detect",
+      "root_cause": "new_endpoint_with_pure_python_loop_blocks_event_loop",
+      "root_service": "roc-installment-service",
+      "cascade_path": ["roc-installment-service", "bb-edge"],
+      "narrative": "Recent deploy of roc-installment-service added a new /score-application endpoint that does heavy Python computation (no asyncio yield). When 5+ concurrent requests hit it, GIL contention starves the asyncio event loop. Other endpoints (healthchecks, simple GETs) start timing out even though CPU isn't pegged.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "roc-installment-service", "metric": "gil_wait_pct", "drift_value": "5->22%", "noise": 0.1}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "roc-installment-service", "metric": "gil_wait_pct", "drift_value": "22->85%"},
+          {"service": "roc-installment-service", "metric": "latency_p99_ms", "drift_pct": 600},
+          {"service": "roc-installment-service", "metric": "cpu_cores", "drift_pct": 80},
+          {"service": "bb-edge", "metric": "latency_p99_ms", "drift_pct": 350, "delay_min": 2},
+          {"service": "bb-edge", "metric": "error_rate", "drift_pct": 4000, "delay_min": 4}
+        ], "alerts": [
+          {"t_offset_sec": 120, "rule": "python-gil-waiting-time", "service": "roc-installment-service", "severity": "warning"},
+          {"t_offset_sec": 240, "rule": "latency-p99-high", "service": "bb-edge", "severity": "warning"}
+        ], "log_patterns": [
+          {"service": "roc-installment-service", "count": 28, "pattern": "asyncio: task took 2.4s to yield, event loop lag detected"},
+          {"service": "bb-edge", "count": 18, "pattern": "Upstream roc-installment-service timeout after 3000ms on /score-application"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "roc-installment-service", "metric": "gil_wait_pct", "drift_value": "85->80%"}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "feature-flag /score-application off; deploy fix moves heavy compute to ThreadPoolExecutor", "signals": [
+          {"service": "roc-installment-service", "metric": "gil_wait_pct", "drift_pct": 0, "recover": true},
+          {"service": "bb-edge", "metric": "latency_p99_ms", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "roc-installment-service",
+        "top_metric": "gil_wait_pct",
+        "explanation": "CPU không pegged (~80% nhưng có headroom) — confusing signal. GIL wait là smoking gun. Bb-edge degraded vì upstream timeout.",
+        "pagerank_winner": "roc-installment-service",
+        "topology_evidence": "bb-edge → roc-installment edge degraded; bb-edge self CPU/mem fine"
+      },
+      "discussion_prompts": [
+        "Nếu chỉ có CPU + latency, làm sao distinguish GIL contention vs CPU starvation?",
+        "Anomaly detection thấy gil_wait drift sớm 15' trước alert — pre-incident forecast có nên trigger preemptive remediation không?"
+      ]
+    },
+    {
+      "id": "S04",
+      "name": "BB-edge TLS cert expiry",
+      "block": "hour2_correlate",
+      "root_cause": "wildcard_cert_expired_no_autorenew",
+      "root_service": "bb-edge",
+      "cascade_path": ["bb-edge"],
+      "narrative": "Wildcard TLS cert (*.app.internal) expired at 03:00 UTC. cert-manager autorenew was disabled during a maintenance window 2 weeks ago and never re-enabled. BB-edge fails TLS handshake for ALL incoming requests; error rate jumps to 100% instantly. No upstream/downstream cascade — pure ingress failure.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "bb-edge", "metric": "tls_cert_days_until_expiry", "drift_value": "14->0"}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "bb-edge", "metric": "error_rate", "drift_value": "0.001->1.0"},
+          {"service": "bb-edge", "metric": "rps", "drift_pct": -90},
+          {"service": "bb-edge", "metric": "tls_handshake_failures", "drift_value": "0->300/sec"}
+        ], "alerts": [
+          {"t_offset_sec": 15, "rule": "error-rate-spike", "service": "bb-edge", "severity": "critical"},
+          {"t_offset_sec": 30, "rule": "tls-handshake-failure", "service": "bb-edge", "severity": "critical"}
+        ], "log_patterns": [
+          {"service": "bb-edge", "count": 500, "pattern": "TLS handshake failed: certificate has expired (notAfter=2026-06-09T03:00:00Z)"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "bb-edge", "metric": "error_rate", "drift_pct": 99000}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "manual cert rotation via cert-manager Certificate CR + reload pods", "signals": [
+          {"service": "bb-edge", "metric": "error_rate", "drift_pct": 0, "recover": true},
+          {"service": "bb-edge", "metric": "rps", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "bb-edge",
+        "top_metric": "tls_handshake_failures",
+        "explanation": "Cascade KHÔNG xảy ra — bb-edge là entrypoint, downstream (roc-installment, ...) khoẻ vì không có traffic đến nữa. RCA nhìn upstream sẽ bị lừa: 'roc-installment perfectly healthy, must be bb-edge bug'.",
+        "pagerank_winner": "bb-edge",
+        "topology_evidence": "bb-edge isolated failure; downstream RPS drops because input dries up, not because they're broken"
+      },
+      "discussion_prompts": [
+        "Pre-incident forecast: tls_cert_days_until_expiry=7 nên trigger ticket không?",
+        "Tại sao downstream RPS drop 90% lại là HEALTH SIGN, không phải failure?",
+        "Anti-pattern: PagerDuty fire bb-edge AND roc-installment vì cascade — paging fatigue?"
+      ]
+    },
+    {
+      "id": "S05",
+      "name": "JVM memory leak in ESB",
+      "block": "hour2_correlate",
+      "root_cause": "esb_request_cache_unbounded_growth_for_t24_responses",
+      "root_service": "esb",
+      "cascade_path": ["esb", "datapower"],
+      "narrative": "ESB caches T24 responses with no TTL. Memory grows linearly over hours (200 → 850MB). GC pause time increases proportionally. At ~80% heap, full GC pauses hit 4s every 2 min, causing intermittent latency spikes. Eventually OOMKilled and k8s restart.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "esb", "metric": "mem_mb", "drift_value": "270->480"},
+          {"service": "esb", "metric": "gc_pause_ms", "drift_value": "50->180"}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "esb", "metric": "mem_mb", "drift_value": "480->820"},
+          {"service": "esb", "metric": "gc_pause_ms", "drift_value": "180->4000"},
+          {"service": "esb", "metric": "latency_p99_ms", "drift_pct": 350, "spiky": true},
+          {"service": "datapower", "metric": "latency_p99_ms", "drift_pct": 150, "delay_min": 5, "spiky": true}
+        ], "alerts": [
+          {"t_offset_sec": 180, "rule": "memory-leak", "service": "esb", "severity": "warning"},
+          {"t_offset_sec": 420, "rule": "jvm-availability", "service": "esb", "severity": "critical"}
+        ], "log_patterns": [
+          {"service": "esb", "count": 6, "pattern": "GC pause: 4127ms (full GC, heap 820MB/1024MB)"},
+          {"service": "esb", "count": 2, "pattern": "OutOfMemoryError: Java heap space at com.example.cache.ResponseCache.put"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "esb", "metric": "mem_mb", "drift_value": "820->980", "spiky": true}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "rolling restart + hotfix add 10min TTL to ResponseCache", "signals": [
+          {"service": "esb", "metric": "mem_mb", "drift_pct": 0, "recover": true},
+          {"service": "esb", "metric": "gc_pause_ms", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "esb",
+        "top_metric": "mem_mb",
+        "explanation": "Spiky latency every 2 min (GC pauses) là pattern khó cho 3σ — alert miss khi metric oscillate. Memory monotonic growth là smoking gun.",
+        "pagerank_winner": "esb",
+        "topology_evidence": "Datapower spiky latency CORRELATED với ESB GC pauses — Granger causality test confirms"
+      },
+      "discussion_prompts": [
+        "3σ alert miss spiky metric vì mean cao + std cao. LSTM-AE bắt được không?",
+        "Memory drift linear 4h trước OOM — forecast model nào dự đoán được time-to-OOM?",
+        "Đây là cách bạn explain cho 1 product manager: 'metric oscillate nhưng vẫn là incident'."
+      ]
+    },
+    {
+      "id": "S06",
+      "name": "T24 backend timeout cascades up",
+      "block": "hour2_correlate",
+      "root_cause": "t24_db_replica_lag_during_business_close_batch",
+      "root_service": "t24-service",
+      "cascade_path": ["t24-service", "esb", "datapower", "bb-edge"],
+      "narrative": "T24 end-of-day batch job competes with online traffic for DB replicas. T24 latency goes from 80ms p50 → 1200ms p50. ESB calls timeout (3s threshold). Datapower retries 3x then 504s. BB-edge users see 'transaction pending' but no clear error. 4-hop cascade across the entire backend chain.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "t24-service", "metric": "latency_p50_ms", "drift_value": "80->180", "noise": 0.15},
+          {"service": "t24-service", "metric": "db_replica_lag_sec", "drift_value": "0.5->4.2"}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "t24-service", "metric": "latency_p50_ms", "drift_value": "180->1200"},
+          {"service": "t24-service", "metric": "latency_p99_ms", "drift_value": "450->4500"},
+          {"service": "esb", "metric": "error_rate", "drift_pct": 6000, "delay_min": 1},
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 4500, "delay_min": 3},
+          {"service": "bb-edge", "metric": "latency_p99_ms", "drift_pct": 280, "delay_min": 5}
+        ], "alerts": [
+          {"t_offset_sec": 90, "rule": "latency-p99-high", "service": "t24-service", "severity": "warning"},
+          {"t_offset_sec": 150, "rule": "upstream-timeout", "service": "esb", "severity": "critical"},
+          {"t_offset_sec": 270, "rule": "upstream-timeout", "service": "datapower", "severity": "critical"},
+          {"t_offset_sec": 360, "rule": "latency-p99-high", "service": "bb-edge", "severity": "warning"}
+        ], "log_patterns": [
+          {"service": "esb", "count": 80, "pattern": "Timeout waiting for t24-service response after 3000ms"},
+          {"service": "datapower", "count": 35, "pattern": "Retry 3/3 failed for esb endpoint, returning 504"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "t24-service", "metric": "latency_p99_ms", "drift_value": "4500->4000"}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "scale t24 read replicas 2->4 + throttle batch job to off-hours window", "signals": [
+          {"service": "t24-service", "metric": "latency_p99_ms", "drift_pct": 0, "recover": true},
+          {"service": "esb", "metric": "error_rate", "drift_pct": 0, "recover": true},
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 0, "recover": true},
+          {"service": "bb-edge", "metric": "latency_p99_ms", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "t24-service",
+        "top_metric": "db_replica_lag_sec",
+        "explanation": "4-hop cascade. Naive 'fix the alerting service' = fix wrong thing. PageRank trên reverse topology (downstream-aware) ranks t24 highest dù alerts fire ngược chiều.",
+        "pagerank_winner": "t24-service",
+        "topology_evidence": "Alerts fire bb-edge → datapower → esb → t24 over 6 minutes. RCA must traverse reverse to find earliest drift."
+      },
+      "discussion_prompts": [
+        "Naive: fix alerting service first. PageRank reverse-topology: fix t24 first. Discuss.",
+        "Alert sequence ngược cascade direction — vì sao? (downstream khoẻ bị block trước upstream alert thresh)",
+        "Granger causality: db_replica_lag → latency drift, lag=30sec. Đủ evidence cho RCA tự tin?"
+      ]
+    },
+    {
+      "id": "S07",
+      "name": "bb-confirmation-service OOM silent cascade",
+      "block": "hour2_correlate",
+      "root_cause": "bb_confirmation_pod_oomkilled_no_alert_due_to_silent_fallback",
+      "root_service": "bb-confirmation-service",
+      "cascade_path": ["bb-confirmation-service", "roc-installment-service", "bb-edge"],
+      "narrative": "bb-confirmation-service pod gets OOMKilled. k8s restarts it but the service has a 'graceful degradation' fallback in roc-installment that returns stale data when confirmation is unreachable. No errors propagate; users get stale confirmation status. Only metrics: bb-confirmation pod restart_count++, roc-installment cache_hit_rate spikes from 5% → 80%.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "bb-confirmation-service", "metric": "mem_mb", "drift_value": "350->480"}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "bb-confirmation-service", "metric": "mem_mb", "drift_value": "480->520"},
+          {"service": "bb-confirmation-service", "metric": "pod_restart_count", "drift_value": "0->3"},
+          {"service": "roc-installment-service", "metric": "cache_hit_rate", "drift_value": "0.05->0.80"},
+          {"service": "roc-installment-service", "metric": "stale_response_count", "drift_value": "0->180/min"}
+        ], "alerts": [
+          {"t_offset_sec": 60, "rule": "kubernetes-events", "service": "bb-confirmation-service", "severity": "warning"}
+        ], "log_patterns": [
+          {"service": "bb-confirmation-service", "count": 3, "pattern": "Container OOMKilled, restarting (signal=SIGKILL exitCode=137)"},
+          {"service": "roc-installment-service", "count": 180, "pattern": "Fallback to cached confirmation (age=12min) due to upstream unreachable"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "roc-installment-service", "metric": "stale_response_count", "drift_value": "180->220/min"}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "increase bb-confirmation pod mem limit 512Mi -> 1Gi + alert on stale_response_count > 50/min", "signals": [
+          {"service": "bb-confirmation-service", "metric": "pod_restart_count", "drift_pct": 0, "recover": true},
+          {"service": "roc-installment-service", "metric": "stale_response_count", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "bb-confirmation-service",
+        "top_metric": "pod_restart_count",
+        "explanation": "SILENT cascade — no error propagates. Only 1 k8s-event alert (low severity). RCA must look at unusual metric SHIFTS (cache_hit_rate jump), not error counts.",
+        "pagerank_winner": "bb-confirmation-service",
+        "topology_evidence": "Latency/error metrics on all services NORMAL. Only proxy signal: cache_hit_rate jumps to 80%."
+      },
+      "discussion_prompts": [
+        "Anomaly detector chỉ alert khi error/latency. Cache_hit_rate jump không tự nó là 'bad' — làm sao detect?",
+        "Graceful degradation HIDES incidents. Tradeoff: ổn định user-facing vs visibility cho ops team?",
+        "Đây là 'unknown unknown' — alert nào sẽ cover? (Hint: alert on metric SHIFT, không phải absolute threshold)"
+      ]
+    },
+    {
+      "id": "S08",
+      "name": "Datapower-ESB network partition",
+      "block": "hour3_closedloop",
+      "root_cause": "k8s_networkpolicy_misapplied_blocks_datapower_to_esb_egress",
+      "root_service": "k8s_networkpolicy",
+      "cascade_path": ["datapower", "esb"],
+      "narrative": "DevOps applies new NetworkPolicy to namespace `services` for compliance audit. Policy missing egress rule for esb → datapower. From datapower's POV: ESB is unreachable. From esb's POV: requests stopped coming, looks like quiet period. Bilateral observability is needed.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "datapower", "metric": "tcp_connect_failure_count", "drift_value": "0->1/min", "noise": 0.3}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "datapower", "metric": "tcp_connect_failure_count", "drift_value": "1->85/min"},
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 7000},
+          {"service": "esb", "metric": "rps", "drift_pct": -60}
+        ], "alerts": [
+          {"t_offset_sec": 45, "rule": "network-connectivity", "service": "datapower", "severity": "warning"},
+          {"t_offset_sec": 90, "rule": "error-rate-spike", "service": "datapower", "severity": "critical"}
+        ], "log_patterns": [
+          {"service": "datapower", "count": 90, "pattern": "connection refused: dial tcp 10.42.3.12:8080: i/o timeout (esb endpoint)"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 6500}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "rollback NetworkPolicy via kubectl + add ingress rule for datapower SA", "signals": [
+          {"service": "datapower", "metric": "error_rate", "drift_pct": 0, "recover": true},
+          {"service": "esb", "metric": "rps", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "k8s_networkpolicy",
+        "top_metric": "tcp_connect_failure_count",
+        "explanation": "Infra change, not app code. RCA must correlate with k8s audit log (deploy events). Single-service-view sẽ miss — ESB nhìn bình thường (chỉ ít traffic hơn).",
+        "pagerank_winner": "datapower",
+        "topology_evidence": "Asymmetric signal: datapower tcp_connect_failure_count high, esb rps low. Combined = network issue between them."
+      },
+      "discussion_prompts": [
+        "ESB rps drop 60% — looks healthy or unhealthy? Cần baseline.",
+        "Auto-remediation: rollback last k8s apply 5' trước incident. An toàn không? (rollback policy = mở firewall = compliance violation)",
+        "Closed-loop decision: nếu RCA confidence < 0.7 thì page on-call thay vì auto-act. Threshold thực tế?"
+      ]
+    },
+    {
+      "id": "S09",
+      "name": "Chaos-daemon resource hog noisy neighbor",
+      "block": "hour3_closedloop",
+      "root_cause": "chaos_mesh_experiment_misconfigured_unbounded_cpu",
+      "root_service": "chaos-daemon",
+      "cascade_path": ["chaos-daemon", "roc-installment-service", "esb"],
+      "narrative": "Someone runs `kubectl apply -f chaos-experiment.yaml` with `cpu_load: '100'` instead of `'10'` (typo). Chaos-daemon DaemonSet eats 100% CPU on every node. Co-located pods (roc-installment, esb) get CPU throttled. Latency spikes correlate exactly with chaos-daemon CPU spike.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "chaos-daemon", "metric": "cpu_cores", "drift_value": "0.0->0.05", "noise": 0.5}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "chaos-daemon", "metric": "cpu_cores", "drift_value": "0.05->4.0"},
+          {"service": "roc-installment-service", "metric": "cpu_throttled_pct", "drift_value": "0->65"},
+          {"service": "roc-installment-service", "metric": "latency_p99_ms", "drift_pct": 280},
+          {"service": "esb", "metric": "cpu_throttled_pct", "drift_value": "0->40"},
+          {"service": "esb", "metric": "latency_p99_ms", "drift_pct": 180}
+        ], "alerts": [
+          {"t_offset_sec": 60, "rule": "latency-p99-high", "service": "roc-installment-service", "severity": "warning"},
+          {"t_offset_sec": 90, "rule": "latency-p99-high", "service": "esb", "severity": "warning"}
+        ], "log_patterns": [
+          {"service": "chaos-daemon", "count": 4, "pattern": "chaos-experiment cpu-burn started: load=100, duration=900s, pods=all"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "chaos-daemon", "metric": "cpu_cores", "drift_value": "4.0->3.8"}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "kubectl delete chaosexperiment cpu-burn-test", "signals": [
+          {"service": "chaos-daemon", "metric": "cpu_cores", "drift_pct": 0, "recover": true},
+          {"service": "roc-installment-service", "metric": "cpu_throttled_pct", "drift_pct": 0, "recover": true},
+          {"service": "esb", "metric": "cpu_throttled_pct", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "chaos-daemon",
+        "top_metric": "cpu_cores",
+        "explanation": "Multiple alerting services (roc, esb) SHARE node với chaos-daemon. Topology không kết nối chaos-daemon → roc trong code, nhưng SHARES infra. RCA cần node-level view, không chỉ service-level.",
+        "pagerank_winner": "chaos-daemon",
+        "topology_evidence": "Service graph KHÔNG cho thấy chaos-daemon là root (no edges). Cần node-affinity metric."
+      },
+      "discussion_prompts": [
+        "Service graph PageRank fail ở đây. Cần augment với node-level metrics (per-node CPU/mem). Như thế nào?",
+        "Auto-remediation: kill chaos-experiment vs cordon node? Tradeoffs.",
+        "Pre-incident forecast trên chaos-daemon CPU drift 15' trước alert: action?"
+      ]
+    },
+    {
+      "id": "S10",
+      "name": "Slow-burn ML drift — forecast catches before threshold",
+      "block": "hour3_closedloop",
+      "root_cause": "roc_installment_model_drift_due_to_seasonal_application_distribution",
+      "root_service": "roc-installment-service",
+      "cascade_path": ["roc-installment-service"],
+      "narrative": "ML model in roc-installment scores loan applications. Training distribution doesn't match weekend application pattern (more refinance, less new). Model latency creeps up (40 → 110ms) over 4 hours — never crosses static p99 threshold but pre-incident forecast model flags 'p99 will cross 2s in 90min' with 78% confidence. Demo of proactive RCA flow.",
+      "phases": [
+        {"name": "pre", "duration_min": 15, "signals": [
+          {"service": "roc-installment-service", "metric": "model_inference_ms", "drift_value": "40->75"},
+          {"service": "roc-installment-service", "metric": "feature_drift_score", "drift_value": "0.05->0.42"}
+        ]},
+        {"name": "active", "duration_min": 15, "signals": [
+          {"service": "roc-installment-service", "metric": "model_inference_ms", "drift_value": "75->110"},
+          {"service": "roc-installment-service", "metric": "feature_drift_score", "drift_value": "0.42->0.78"},
+          {"service": "roc-installment-service", "metric": "latency_p99_ms", "drift_pct": 80}
+        ], "alerts": [
+          {"t_offset_sec": 300, "rule": "forecast-incident-pre", "service": "roc-installment-service", "severity": "info", "note": "predictive alert from L2 forecasting engine"}
+        ], "log_patterns": [
+          {"service": "roc-installment-service", "count": 22, "pattern": "Feature drift detected: weekend_indicator distribution shift 0.78"}
+        ]},
+        {"name": "post", "duration_min": 10, "signals": [
+          {"service": "roc-installment-service", "metric": "model_inference_ms", "drift_value": "110->130"}
+        ]},
+        {"name": "recovery", "duration_min": 5, "remediation": "shadow-deploy retrained model (trained on 4-week rolling window) + canary 10% traffic", "signals": [
+          {"service": "roc-installment-service", "metric": "model_inference_ms", "drift_pct": 0, "recover": true},
+          {"service": "roc-installment-service", "metric": "feature_drift_score", "drift_pct": 0, "recover": true}
+        ]}
+      ],
+      "expected_rca": {
+        "top_service": "roc-installment-service",
+        "top_metric": "feature_drift_score",
+        "explanation": "KHÔNG có alert nào fire (chưa cross threshold). Pre-incident forecast là signal duy nhất. RCA pivot: instead of explaining current state, RCA explains predicted state.",
+        "pagerank_winner": "roc-installment-service",
+        "topology_evidence": "Single service, no cascade. RCA is feature drift correlation, not topology."
+      },
+      "discussion_prompts": [
+        "Pre-incident forecast confidence 78%. Auto-remediate hay page human? Production threshold?",
+        "Shadow deploy của retrained model = remediation. Nhưng nếu retrained model TỆ hơn thì sao? Rollback strategy.",
+        "Đây là demo của closed-loop FULL: detect → predict → enrich → decide → act → verify. Liệt kê các phase tương ứng."
+      ]
+    }
+  ]
+}

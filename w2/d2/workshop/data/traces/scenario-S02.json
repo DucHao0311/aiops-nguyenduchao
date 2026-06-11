@@ -1,0 +1,194 @@
+[
+  {
+    "trace_id": "0f568e84d10ede8b237c571e82218151",
+    "phase": "pre",
+    "spans": [
+      {
+        "trace_id": "0f568e84d10ede8b237c571e82218151",
+        "span_id": "5cbee7a4f01a16ef",
+        "parent_id": null,
+        "service": "coredns",
+        "operation": "coredns/handle",
+        "start_time": "2026-06-09T09:07:30+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S02"
+        }
+      },
+      {
+        "trace_id": "0f568e84d10ede8b237c571e82218151",
+        "span_id": "02b78bcca7fb87db",
+        "parent_id": "5cbee7a4f01a16ef",
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T09:07:30.001000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S02"
+        }
+      },
+      {
+        "trace_id": "0f568e84d10ede8b237c571e82218151",
+        "span_id": "44714fe12a300dce",
+        "parent_id": "02b78bcca7fb87db",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T09:07:30.002000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S02"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "68eeabb94e5215706fcc82634b669808",
+    "phase": "active",
+    "spans": [
+      {
+        "trace_id": "68eeabb94e5215706fcc82634b669808",
+        "span_id": "1ffb6bf247f7b46c",
+        "parent_id": null,
+        "service": "coredns",
+        "operation": "coredns/handle",
+        "start_time": "2026-06-09T09:22:30+00:00",
+        "duration_ms": 250,
+        "status": "OK",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S02"
+        }
+      },
+      {
+        "trace_id": "68eeabb94e5215706fcc82634b669808",
+        "span_id": "b21cc648777be006",
+        "parent_id": "1ffb6bf247f7b46c",
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T09:22:30.001000+00:00",
+        "duration_ms": 250,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S02"
+        }
+      },
+      {
+        "trace_id": "68eeabb94e5215706fcc82634b669808",
+        "span_id": "667a6d399b5fc015",
+        "parent_id": "b21cc648777be006",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T09:22:30.002000+00:00",
+        "duration_ms": 3000,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S02"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "bac0312aa8f456e7310e4d72dd084bff",
+    "phase": "post",
+    "spans": [
+      {
+        "trace_id": "bac0312aa8f456e7310e4d72dd084bff",
+        "span_id": "ef323287c74f6d45",
+        "parent_id": null,
+        "service": "coredns",
+        "operation": "coredns/handle",
+        "start_time": "2026-06-09T09:35:00+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S02"
+        }
+      },
+      {
+        "trace_id": "bac0312aa8f456e7310e4d72dd084bff",
+        "span_id": "54e667470a253123",
+        "parent_id": "ef323287c74f6d45",
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T09:35:00.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S02"
+        }
+      },
+      {
+        "trace_id": "bac0312aa8f456e7310e4d72dd084bff",
+        "span_id": "885210e0d1c5c926",
+        "parent_id": "54e667470a253123",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T09:35:00.002000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S02"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "91cf7b100277dc1e2bf373c8d042ca42",
+    "phase": "recovery",
+    "spans": [
+      {
+        "trace_id": "91cf7b100277dc1e2bf373c8d042ca42",
+        "span_id": "788514c9b2dfc752",
+        "parent_id": null,
+        "service": "coredns",
+        "operation": "coredns/handle",
+        "start_time": "2026-06-09T09:42:30+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S02"
+        }
+      },
+      {
+        "trace_id": "91cf7b100277dc1e2bf373c8d042ca42",
+        "span_id": "d10d4141ba168a6c",
+        "parent_id": "788514c9b2dfc752",
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T09:42:30.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S02"
+        }
+      },
+      {
+        "trace_id": "91cf7b100277dc1e2bf373c8d042ca42",
+        "span_id": "3a3984deec48871e",
+        "parent_id": "d10d4141ba168a6c",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T09:42:30.002000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S02"
+        }
+      }
+    ]
+  }
+]

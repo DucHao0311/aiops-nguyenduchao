@@ -1,0 +1,42 @@
+{
+  "alerts": [
+    {
+      "id": "78e5e7fed691",
+      "scenario": "S02",
+      "rule_id": "dns-nxdomain-errors",
+      "service": "datapower",
+      "severity": "warning",
+      "opened_at": "2026-06-09T09:15:30+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "dce60dbb0cf0",
+      "scenario": "S02",
+      "rule_id": "latency-p99-high",
+      "service": "datapower",
+      "severity": "critical",
+      "opened_at": "2026-06-09T09:17:00+00:00",
+      "phase": "active",
+      "note": null
+    }
+  ],
+  "log_patterns": [
+    {
+      "scenario": "S02",
+      "service": "datapower",
+      "count": 240,
+      "pattern": "DNS resolution failed for esb.svc.cluster.local: NXDOMAIN",
+      "first_seen_at": "2026-06-09T09:15:30+00:00",
+      "phase": "active"
+    },
+    {
+      "scenario": "S02",
+      "service": "datapower",
+      "count": 60,
+      "pattern": "Retry exhausted after 5 attempts, returning 503 to client",
+      "first_seen_at": "2026-06-09T09:15:30+00:00",
+      "phase": "active"
+    }
+  ]
+}

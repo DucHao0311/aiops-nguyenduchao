@@ -1,0 +1,42 @@
+{
+  "alerts": [
+    {
+      "id": "98d624780c60",
+      "scenario": "S03",
+      "rule_id": "python-gil-waiting-time",
+      "service": "roc-installment-service",
+      "severity": "warning",
+      "opened_at": "2026-06-09T10:17:00+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "8396a2413c24",
+      "scenario": "S03",
+      "rule_id": "latency-p99-high",
+      "service": "bb-edge",
+      "severity": "warning",
+      "opened_at": "2026-06-09T10:19:00+00:00",
+      "phase": "active",
+      "note": null
+    }
+  ],
+  "log_patterns": [
+    {
+      "scenario": "S03",
+      "service": "roc-installment-service",
+      "count": 28,
+      "pattern": "asyncio: task took 2.4s to yield, event loop lag detected",
+      "first_seen_at": "2026-06-09T10:15:30+00:00",
+      "phase": "active"
+    },
+    {
+      "scenario": "S03",
+      "service": "bb-edge",
+      "count": 18,
+      "pattern": "Upstream roc-installment-service timeout after 3000ms on /score-application",
+      "first_seen_at": "2026-06-09T10:15:30+00:00",
+      "phase": "active"
+    }
+  ]
+}

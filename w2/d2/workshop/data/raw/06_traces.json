@@ -1,0 +1,32 @@
+{
+  "xlw2hq4x:backbase:Deployment:bb-edge": {
+    "summary": null,
+    "errors": [],
+    "note": "traces_summary and traces_errors returned null — no distributed tracing data available for this app"
+  },
+  "xlw2hq4x:chaos-mesh:DaemonSet:chaos-daemon": {
+    "summary": null,
+    "errors": [],
+    "note": "traces_summary and traces_errors returned null — no distributed tracing data available for this app"
+  },
+  "xlw2hq4x:roc-services:Deployment:roc-installment-service": {
+    "summary": null,
+    "errors": [],
+    "note": "traces_summary and traces_errors returned null — no distributed tracing data available for this app"
+  },
+  "xlw2hq4x:services:Deployment:datapower": {
+    "summary": null,
+    "errors": [],
+    "note": "traces_summary and traces_errors returned null — no distributed tracing data available for this app"
+  },
+  "xlw2hq4x:services:Deployment:esb": {
+    "summary": null,
+    "errors": [],
+    "note": "traces_summary and traces_errors returned null — no distributed tracing data available for this app"
+  },
+  "_metadata": {
+    "query_time_range": "now-1h to now",
+    "status": "no_tracing_data",
+    "explanation": "All traces_summary and traces_errors calls returned null for all 5 apps and project-wide. The roc-aws cluster likely does not have OpenTelemetry trace collection configured, or traces are not being shipped to Coroot ClickHouse."
+  }
+}

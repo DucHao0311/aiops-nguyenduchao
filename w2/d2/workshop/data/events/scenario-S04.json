@@ -1,0 +1,34 @@
+{
+  "alerts": [
+    {
+      "id": "d4ba5c2e20d0",
+      "scenario": "S04",
+      "rule_id": "error-rate-spike",
+      "service": "bb-edge",
+      "severity": "critical",
+      "opened_at": "2026-06-09T11:15:15+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "cbddaae06a7d",
+      "scenario": "S04",
+      "rule_id": "tls-handshake-failure",
+      "service": "bb-edge",
+      "severity": "critical",
+      "opened_at": "2026-06-09T11:15:30+00:00",
+      "phase": "active",
+      "note": null
+    }
+  ],
+  "log_patterns": [
+    {
+      "scenario": "S04",
+      "service": "bb-edge",
+      "count": 500,
+      "pattern": "TLS handshake failed: certificate has expired (notAfter=2026-06-09T03:00:00Z)",
+      "first_seen_at": "2026-06-09T11:15:30+00:00",
+      "phase": "active"
+    }
+  ]
+}

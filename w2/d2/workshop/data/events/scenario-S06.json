@@ -1,0 +1,62 @@
+{
+  "alerts": [
+    {
+      "id": "72ca931f56d6",
+      "scenario": "S06",
+      "rule_id": "latency-p99-high",
+      "service": "t24-service",
+      "severity": "warning",
+      "opened_at": "2026-06-09T13:16:30+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "5f6d01b43447",
+      "scenario": "S06",
+      "rule_id": "upstream-timeout",
+      "service": "esb",
+      "severity": "critical",
+      "opened_at": "2026-06-09T13:17:30+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "4878bf0530c7",
+      "scenario": "S06",
+      "rule_id": "upstream-timeout",
+      "service": "datapower",
+      "severity": "critical",
+      "opened_at": "2026-06-09T13:19:30+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "dd531b43f94a",
+      "scenario": "S06",
+      "rule_id": "latency-p99-high",
+      "service": "bb-edge",
+      "severity": "warning",
+      "opened_at": "2026-06-09T13:21:00+00:00",
+      "phase": "active",
+      "note": null
+    }
+  ],
+  "log_patterns": [
+    {
+      "scenario": "S06",
+      "service": "esb",
+      "count": 80,
+      "pattern": "Timeout waiting for t24-service response after 3000ms",
+      "first_seen_at": "2026-06-09T13:15:30+00:00",
+      "phase": "active"
+    },
+    {
+      "scenario": "S06",
+      "service": "datapower",
+      "count": 35,
+      "pattern": "Retry 3/3 failed for esb endpoint, returning 504",
+      "first_seen_at": "2026-06-09T13:15:30+00:00",
+      "phase": "active"
+    }
+  ]
+}

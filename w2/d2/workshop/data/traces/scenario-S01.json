@@ -1,0 +1,194 @@
+[
+  {
+    "trace_id": "7ddffcd19aa5c5e602d439613c57bc12",
+    "phase": "pre",
+    "spans": [
+      {
+        "trace_id": "7ddffcd19aa5c5e602d439613c57bc12",
+        "span_id": "92c4bb3de930cc14",
+        "parent_id": null,
+        "service": "t24-service",
+        "operation": "t24-service/handle",
+        "start_time": "2026-06-09T08:07:30+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S01"
+        }
+      },
+      {
+        "trace_id": "7ddffcd19aa5c5e602d439613c57bc12",
+        "span_id": "b295aea469f5aaf3",
+        "parent_id": "92c4bb3de930cc14",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T08:07:30.001000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S01"
+        }
+      },
+      {
+        "trace_id": "7ddffcd19aa5c5e602d439613c57bc12",
+        "span_id": "073d99e7ced1cfd6",
+        "parent_id": "b295aea469f5aaf3",
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T08:07:30.002000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S01"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "a5fbc646145b0c5177ccefd4938ed46e",
+    "phase": "active",
+    "spans": [
+      {
+        "trace_id": "a5fbc646145b0c5177ccefd4938ed46e",
+        "span_id": "6fe8453af8dab7e4",
+        "parent_id": null,
+        "service": "t24-service",
+        "operation": "t24-service/handle",
+        "start_time": "2026-06-09T08:22:30+00:00",
+        "duration_ms": 250,
+        "status": "OK",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S01"
+        }
+      },
+      {
+        "trace_id": "a5fbc646145b0c5177ccefd4938ed46e",
+        "span_id": "ace5d87e9e0c6a88",
+        "parent_id": "6fe8453af8dab7e4",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T08:22:30.001000+00:00",
+        "duration_ms": 250,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S01"
+        }
+      },
+      {
+        "trace_id": "a5fbc646145b0c5177ccefd4938ed46e",
+        "span_id": "0efe56ce400cc29d",
+        "parent_id": "ace5d87e9e0c6a88",
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T08:22:30.002000+00:00",
+        "duration_ms": 3000,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S01"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "62a7c495aea9cf65910dd1e0eef099ae",
+    "phase": "post",
+    "spans": [
+      {
+        "trace_id": "62a7c495aea9cf65910dd1e0eef099ae",
+        "span_id": "8e19b8b64edaa655",
+        "parent_id": null,
+        "service": "t24-service",
+        "operation": "t24-service/handle",
+        "start_time": "2026-06-09T08:35:00+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S01"
+        }
+      },
+      {
+        "trace_id": "62a7c495aea9cf65910dd1e0eef099ae",
+        "span_id": "b1799e91c0556086",
+        "parent_id": "8e19b8b64edaa655",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T08:35:00.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S01"
+        }
+      },
+      {
+        "trace_id": "62a7c495aea9cf65910dd1e0eef099ae",
+        "span_id": "48f1bf124304dd39",
+        "parent_id": "b1799e91c0556086",
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T08:35:00.002000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S01"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "41b1eeac1b340b34e1f6a3871a068a7c",
+    "phase": "recovery",
+    "spans": [
+      {
+        "trace_id": "41b1eeac1b340b34e1f6a3871a068a7c",
+        "span_id": "3d794b3a64139bd5",
+        "parent_id": null,
+        "service": "t24-service",
+        "operation": "t24-service/handle",
+        "start_time": "2026-06-09T08:42:30+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S01"
+        }
+      },
+      {
+        "trace_id": "41b1eeac1b340b34e1f6a3871a068a7c",
+        "span_id": "d2726e70f5c23b03",
+        "parent_id": "3d794b3a64139bd5",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T08:42:30.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S01"
+        }
+      },
+      {
+        "trace_id": "41b1eeac1b340b34e1f6a3871a068a7c",
+        "span_id": "4dbd75f103925212",
+        "parent_id": "d2726e70f5c23b03",
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T08:42:30.002000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S01"
+        }
+      }
+    ]
+  }
+]

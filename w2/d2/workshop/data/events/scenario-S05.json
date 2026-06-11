@@ -1,0 +1,42 @@
+{
+  "alerts": [
+    {
+      "id": "6ad88433a4ae",
+      "scenario": "S05",
+      "rule_id": "memory-leak",
+      "service": "esb",
+      "severity": "warning",
+      "opened_at": "2026-06-09T12:18:00+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "e20c3e2ed68d",
+      "scenario": "S05",
+      "rule_id": "jvm-availability",
+      "service": "esb",
+      "severity": "critical",
+      "opened_at": "2026-06-09T12:22:00+00:00",
+      "phase": "active",
+      "note": null
+    }
+  ],
+  "log_patterns": [
+    {
+      "scenario": "S05",
+      "service": "esb",
+      "count": 6,
+      "pattern": "GC pause: 4127ms (full GC, heap 820MB/1024MB)",
+      "first_seen_at": "2026-06-09T12:15:30+00:00",
+      "phase": "active"
+    },
+    {
+      "scenario": "S05",
+      "service": "esb",
+      "count": 2,
+      "pattern": "OutOfMemoryError: Java heap space at com.example.cache.ResponseCache.put",
+      "first_seen_at": "2026-06-09T12:15:30+00:00",
+      "phase": "active"
+    }
+  ]
+}

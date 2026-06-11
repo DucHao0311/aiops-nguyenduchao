@@ -1,0 +1,52 @@
+{
+  "alerts": [
+    {
+      "id": "2732bf451efa",
+      "scenario": "S01",
+      "rule_id": "latency-p99-high",
+      "service": "esb",
+      "severity": "warning",
+      "opened_at": "2026-06-09T08:16:00+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "5c865d9eb0de",
+      "scenario": "S01",
+      "rule_id": "queue-saturation",
+      "service": "esb",
+      "severity": "critical",
+      "opened_at": "2026-06-09T08:18:00+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "1ded7509efee",
+      "scenario": "S01",
+      "rule_id": "latency-p99-high",
+      "service": "datapower",
+      "severity": "warning",
+      "opened_at": "2026-06-09T08:20:00+00:00",
+      "phase": "active",
+      "note": null
+    }
+  ],
+  "log_patterns": [
+    {
+      "scenario": "S01",
+      "service": "esb",
+      "count": 45,
+      "pattern": "ConnectionPool: timeout acquiring connection (waited 5000ms)",
+      "first_seen_at": "2026-06-09T08:15:30+00:00",
+      "phase": "active"
+    },
+    {
+      "scenario": "S01",
+      "service": "esb",
+      "count": 12,
+      "pattern": "Failed to forward request to t24-service: pool exhausted",
+      "first_seen_at": "2026-06-09T08:15:30+00:00",
+      "phase": "active"
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+[
+  {
+    "trace_id": "21015f9297c6a15b05307b08350ec85c",
+    "phase": "pre",
+    "spans": [
+      {
+        "trace_id": "21015f9297c6a15b05307b08350ec85c",
+        "span_id": "5abadb7ccaf340f3",
+        "parent_id": null,
+        "service": "chaos-daemon",
+        "operation": "chaos-daemon/handle",
+        "start_time": "2026-06-09T16:07:30+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S09"
+        }
+      },
+      {
+        "trace_id": "21015f9297c6a15b05307b08350ec85c",
+        "span_id": "d0a6d7f2fcc891f7",
+        "parent_id": "5abadb7ccaf340f3",
+        "service": "roc-installment-service",
+        "operation": "roc-installment-service/handle",
+        "start_time": "2026-06-09T16:07:30.001000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S09"
+        }
+      },
+      {
+        "trace_id": "21015f9297c6a15b05307b08350ec85c",
+        "span_id": "0aab03101770a50f",
+        "parent_id": "d0a6d7f2fcc891f7",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T16:07:30.002000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S09"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "6dcefa57754a97529f2e827f91f696e1",
+    "phase": "active",
+    "spans": [
+      {
+        "trace_id": "6dcefa57754a97529f2e827f91f696e1",
+        "span_id": "ce8027945b62aba6",
+        "parent_id": null,
+        "service": "chaos-daemon",
+        "operation": "chaos-daemon/handle",
+        "start_time": "2026-06-09T16:22:30+00:00",
+        "duration_ms": 250,
+        "status": "OK",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S09"
+        }
+      },
+      {
+        "trace_id": "6dcefa57754a97529f2e827f91f696e1",
+        "span_id": "fcedcd1f1d2b0517",
+        "parent_id": "ce8027945b62aba6",
+        "service": "roc-installment-service",
+        "operation": "roc-installment-service/handle",
+        "start_time": "2026-06-09T16:22:30.001000+00:00",
+        "duration_ms": 250,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S09"
+        }
+      },
+      {
+        "trace_id": "6dcefa57754a97529f2e827f91f696e1",
+        "span_id": "c497e8f3d21b4de2",
+        "parent_id": "fcedcd1f1d2b0517",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T16:22:30.002000+00:00",
+        "duration_ms": 3000,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S09"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "50bb4a7708a1a9ae61bf46ef969f0f1c",
+    "phase": "post",
+    "spans": [
+      {
+        "trace_id": "50bb4a7708a1a9ae61bf46ef969f0f1c",
+        "span_id": "877303c287d794fb",
+        "parent_id": null,
+        "service": "chaos-daemon",
+        "operation": "chaos-daemon/handle",
+        "start_time": "2026-06-09T16:35:00+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S09"
+        }
+      },
+      {
+        "trace_id": "50bb4a7708a1a9ae61bf46ef969f0f1c",
+        "span_id": "acfa400fdf7e59cf",
+        "parent_id": "877303c287d794fb",
+        "service": "roc-installment-service",
+        "operation": "roc-installment-service/handle",
+        "start_time": "2026-06-09T16:35:00.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S09"
+        }
+      },
+      {
+        "trace_id": "50bb4a7708a1a9ae61bf46ef969f0f1c",
+        "span_id": "ccd1133054328b44",
+        "parent_id": "acfa400fdf7e59cf",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T16:35:00.002000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S09"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "6dc013eb36461343b0825b81642168bb",
+    "phase": "recovery",
+    "spans": [
+      {
+        "trace_id": "6dc013eb36461343b0825b81642168bb",
+        "span_id": "d8fac4ea3fd61b61",
+        "parent_id": null,
+        "service": "chaos-daemon",
+        "operation": "chaos-daemon/handle",
+        "start_time": "2026-06-09T16:42:30+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S09"
+        }
+      },
+      {
+        "trace_id": "6dc013eb36461343b0825b81642168bb",
+        "span_id": "6d66d4cab141fc35",
+        "parent_id": "d8fac4ea3fd61b61",
+        "service": "roc-installment-service",
+        "operation": "roc-installment-service/handle",
+        "start_time": "2026-06-09T16:42:30.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S09"
+        }
+      },
+      {
+        "trace_id": "6dc013eb36461343b0825b81642168bb",
+        "span_id": "599303f683ee4a07",
+        "parent_id": "6d66d4cab141fc35",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T16:42:30.002000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S09"
+        }
+      }
+    ]
+  }
+]

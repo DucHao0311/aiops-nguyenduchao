@@ -1,0 +1,138 @@
+[
+  {
+    "trace_id": "4545ced21a1df9e9056621c7550e5c30",
+    "phase": "pre",
+    "spans": [
+      {
+        "trace_id": "4545ced21a1df9e9056621c7550e5c30",
+        "span_id": "d7bfefc5b2fc4673",
+        "parent_id": null,
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T15:07:30+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S08"
+        }
+      },
+      {
+        "trace_id": "4545ced21a1df9e9056621c7550e5c30",
+        "span_id": "470537dc167592f2",
+        "parent_id": "d7bfefc5b2fc4673",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T15:07:30.001000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S08"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "dd76ef6ba05e8ec54bf1f25fb9ab16aa",
+    "phase": "active",
+    "spans": [
+      {
+        "trace_id": "dd76ef6ba05e8ec54bf1f25fb9ab16aa",
+        "span_id": "cac57d278be18f1c",
+        "parent_id": null,
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T15:22:30+00:00",
+        "duration_ms": 250,
+        "status": "OK",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S08"
+        }
+      },
+      {
+        "trace_id": "dd76ef6ba05e8ec54bf1f25fb9ab16aa",
+        "span_id": "d8aa2b1f9db0ee09",
+        "parent_id": "cac57d278be18f1c",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T15:22:30.001000+00:00",
+        "duration_ms": 3000,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S08"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "afb6922c8eafa958d4d59a31bb0b3c97",
+    "phase": "post",
+    "spans": [
+      {
+        "trace_id": "afb6922c8eafa958d4d59a31bb0b3c97",
+        "span_id": "ad449a533d1eb0b9",
+        "parent_id": null,
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T15:35:00+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S08"
+        }
+      },
+      {
+        "trace_id": "afb6922c8eafa958d4d59a31bb0b3c97",
+        "span_id": "173f18d625570ee9",
+        "parent_id": "ad449a533d1eb0b9",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T15:35:00.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S08"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "b80fe06709868dc0f8f8c1ae77e4163c",
+    "phase": "recovery",
+    "spans": [
+      {
+        "trace_id": "b80fe06709868dc0f8f8c1ae77e4163c",
+        "span_id": "566e3ac192d9224f",
+        "parent_id": null,
+        "service": "datapower",
+        "operation": "datapower/handle",
+        "start_time": "2026-06-09T15:42:30+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S08"
+        }
+      },
+      {
+        "trace_id": "b80fe06709868dc0f8f8c1ae77e4163c",
+        "span_id": "2843c61ab05bca35",
+        "parent_id": "566e3ac192d9224f",
+        "service": "esb",
+        "operation": "esb/handle",
+        "start_time": "2026-06-09T15:42:30.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S08"
+        }
+      }
+    ]
+  }
+]

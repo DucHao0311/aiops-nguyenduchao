@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<title>AIOps Workshop — Live Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<style>
+*{box-sizing:border-box;font-family:'JetBrains Mono','Menlo',monospace;margin:0;padding:0}
+body{background:#0d1117;color:#c9d1d9;min-height:100vh;padding:16px}
+h1{font-size:20px;font-weight:600;margin-bottom:4px;color:#f0f6fc}
+.sub{color:#8b949e;font-size:12px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px}
+.card h2{font-size:13px;color:#f0f6fc;margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.card.alerts h2{color:#f85149}
+.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
+.metric-cell{background:#0d1117;border:1px solid #30363d;border-radius:4px;padding:8px;height:160px;position:relative}
+.metric-cell canvas{position:absolute;left:8px;right:8px;bottom:8px;top:40px}
+.metric-cell .label{font-size:10px;color:#8b949e;margin-bottom:4px}
+.metric-cell .service{font-size:11px;color:#58a6ff;font-weight:600}
+.alert-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:11px}
+.alert-row .sev-critical{color:#f85149;font-weight:700}
+.alert-row .sev-warning{color:#d29922}
+.alert-row .sev-info{color:#58a6ff}
+.alert-row .svc{color:#7ee787}
+.alert-row .ts{color:#6e7681;font-size:10px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.controls select,.controls button{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:6px 12px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px}
+.controls button:hover{border-color:#58a6ff}
+.controls button.danger{border-color:#da3633;color:#f85149}
+.state-bar{background:#1f6feb;color:#fff;padding:4px 10px;border-radius:4px;font-size:11px;display:inline-block;margin-left:8px}
+.state-bar.idle{background:#30363d;color:#8b949e}
+#topology{height:340px;overflow:hidden;cursor:grab}
+#topology svg{display:block}
+.node circle{stroke:#fff;stroke-width:1.5}
+.node text{font-size:11px;fill:#c9d1d9}
+.node.alerting circle{fill:#f85149}
+.node.healthy circle{fill:#3fb950}
+.node.root circle{fill:#d29922;stroke:#d29922;stroke-width:3}
+.edge{stroke:#484f58;stroke-width:1}
+.log-pattern{background:#0d1117;border-left:3px solid #d29922;padding:6px 10px;margin-bottom:6px;font-size:11px}
+.log-pattern .pcount{color:#f85149;font-weight:700;margin-right:6px}
+.log-pattern .svc{color:#7ee787}
+.log-pattern .pat{color:#c9d1d9;margin-top:2px;font-style:italic}
+.rca-rank{padding:6px 0;border-bottom:1px solid #21262d}
+.rca-rank .rank{display:inline-block;width:20px;color:#d29922;font-weight:700}
+.rca-rank .svc{color:#7ee787}
+.rca-rank .score{color:#58a6ff;float:right}
+.rca-explain{font-size:10px;color:#8b949e;margin-top:8px;padding-top:8px;border-top:1px solid #21262d;line-height:1.5}
+.event-feed{max-height:200px;overflow-y:auto;font-size:10px}
+.event-feed .evt{padding:3px 0;border-bottom:1px solid #21262d}
+.event-feed .evt-metric{color:#8b949e}
+.event-feed .evt-alert{color:#f85149;font-weight:600}
+.event-feed .evt-log_pattern{color:#d29922}
+.time-scrubber{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:8px 12px;background:#161b22;border:1px solid #30363d;border-radius:6px}
+.time-scrubber input[type=range]{flex:1;accent-color:#58a6ff;cursor:pointer}
+.time-scrubber .ts-label{font-size:11px;color:#58a6ff;font-weight:600;min-width:50px}
+.time-scrubber .ts-bounds{font-size:10px;color:#6e7681}
+</style>
+</head>
+<body>
+<h1>AIOps Workshop — Live Dashboard <span id="state" class="state-bar idle">IDLE</span></h1>
+<div class="sub">Data: 10 scenarios, 14.9k samples, production chaos eng baseline. SSE stream live events.</div>
+
+<div class="controls">
+  <select id="scenario-select" onchange="loadScenario()"></select>
+  <button onclick="loadScenario()">Load static view</button>
+  <button onclick="triggerLive()">Trigger LIVE replay (60x)</button>
+  <button id="pause-btn" onclick="togglePause()" disabled>Pause</button>
+  <button class="danger" onclick="stopReplay()">Stop</button>
+  <span style="margin-left:auto;color:#8b949e;font-size:11px">SSE: <span id="sse-status">disconnected</span></span>
+</div>
+
+<div class="time-scrubber" id="time-scrubber" style="display:none">
+  <span class="ts-bounds" id="ts-start"></span>
+  <input type="range" id="ts-slider" min="0" max="100" value="100" oninput="scrubTime(this.value)">
+  <span class="ts-label" id="ts-current"></span>
+  <span class="ts-bounds" id="ts-end"></span>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>Metrics (key signals)</h2>
+      <div class="metric-grid" id="metric-grid"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Service topology</h2>
+      <div id="topology"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Live event feed</h2>
+      <div class="event-feed" id="event-feed"></div>
+    </div>
+  </div>
+  <div>
+    <div class="card alerts">
+      <h2>Alerts</h2>
+      <div id="alerts-list"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Log patterns</h2>
+      <div id="log-patterns-list"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>RCA (PageRank)</h2>
+      <div id="rca-content"><em style="color:#6e7681">Load a scenario</em></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = location.origin;
+let currentScenario = null;
+let charts = {};
+let alertingServices = new Set();
+let rootService = null;
+let _allMetrics = {};  // key -> [{timestamp, value}]
+let _allAlerts = [];
+let _allLogs = [];
+let _timeLabels = []; // sorted unique timestamps
+
+async function fetchJSON(path) { const r = await fetch(API + path); return await r.json(); }
+
+async function loadScenarios() {
+  const list = await fetchJSON("/api/scenarios");
+  const sel = document.getElementById("scenario-select");
+  list.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id; opt.textContent = `${s.id} — ${s.name}`;
+    sel.appendChild(opt);
+  });
+  if (list.length) { sel.value = list[0].id; loadScenario(); }
+}
+
+async function loadScenario() {
+  const sid = document.getElementById("scenario-select").value;
+  currentScenario = sid;
+  const sc = await fetchJSON(`/api/scenarios/${sid}`);
+  rootService = sc.root_service;
+  alertingServices = new Set();
+
+  // Alerts
+  const alerts = await fetchJSON(`/api/alerts?scenario=${sid}`);
+  _allAlerts = alerts;
+  alerts.forEach(a => alertingServices.add(a.service));
+  document.getElementById("alerts-list").innerHTML = alerts.length === 0
+    ? '<em style="color:#6e7681">No alerts</em>'
+    : alerts.map(a => `<div class="alert-row">
+        <div><span class="sev-${a.severity}">[${a.severity.toUpperCase()}]</span> <span class="svc">${a.service}</span> ${a.rule_id}</div>
+        <div class="ts">${a.opened_at.slice(11,19)}</div>
+      </div>`).join("");
+
+  // Log patterns
+  const lps = await fetchJSON(`/api/log_patterns?scenario=${sid}`);
+  _allLogs = lps;
+  document.getElementById("log-patterns-list").innerHTML = lps.length === 0
+    ? '<em style="color:#6e7681">No patterns</em>'
+    : lps.map(lp => `<div class="log-pattern">
+        <span class="pcount">${lp.count}x</span><span class="svc">${lp.service}</span>
+        <div class="pat">${escapeHtml(lp.pattern)}</div>
+      </div>`).join("");
+
+  // RCA
+  const rca = await fetchJSON(`/api/rca/${sid}`);
+  document.getElementById("rca-content").innerHTML = `
+    ${rca.ranked_root_causes.map((r,i) => `<div class="rca-rank">
+      <span class="rank">${i+1}.</span><span class="svc">${r.service}</span><span class="score">${r.score}</span>
+    </div>`).join("")}
+    <div class="rca-explain"><b style="color:#d29922">Expected:</b> ${escapeHtml(rca.expected?.explanation || "")}</div>
+  `;
+
+  // Metrics — pick top 6 signals from scenario phases
+  await renderMetrics(sid, sc);
+
+  // Topology
+  await renderTopology();
+}
+
+async function renderMetrics(sid, sc) {
+  const grid = document.getElementById("metric-grid");
+  const pairs = new Set();
+  for (const ph of sc.phases) for (const sig of (ph.signals || []))
+    pairs.add(`${sig.service}|${sig.metric}`);
+  const top = [...pairs].slice(0, 6);
+  grid.innerHTML = top.map(p => {
+    const [svc, m] = p.split("|");
+    return `<div class="metric-cell"><div class="service">${svc}</div><div class="label">${m}</div><canvas id="c-${cleanId(p)}"></canvas></div>`;
+  }).join("");
+  for (const cid of Object.keys(charts)) { charts[cid].destroy(); }
+  charts = {};
+  _allMetrics = {};
+  const allTs = new Set();
+  for (const p of top) {
+    const [svc, m] = p.split("|");
+    const data = await fetchJSON(`/api/metrics?scenario=${sid}&service=${encodeURIComponent(svc)}&metric=${encodeURIComponent(m)}`);
+    _allMetrics[p] = data;
+    data.forEach(d => allTs.add(d.timestamp));
+    const ctx = document.getElementById("c-" + cleanId(p));
+    charts[p] = new Chart(ctx, {
+      type: "line",
+      data: { labels: data.map(d => d.timestamp.slice(11,16)),
+              datasets: [{ data: data.map(d => d.value), borderColor: "#58a6ff", borderWidth: 1.5,
+                           pointRadius: 0, fill: false }] },
+      options: { responsive: true, maintainAspectRatio: false,
+                 layout: { padding: { top: 10, bottom: 10, left: 4, right: 4 } },
+                 plugins: { legend: { display: false },
+                            zoom: { pan: { enabled: true, mode: "y" },
+                                    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "y" } } },
+                 scales: { x: { display: false }, y: { beginAtZero: false, ticks: { display: false }, grid: { color: "#21262d" }, grace: "10%" } },
+                 elements: { line: { tension: 0.2, borderWidth: 1.5 } } }
+    });
+  }
+  // Setup time scrubber
+  _timeLabels = [...allTs].sort();
+  const scrubber = document.getElementById("time-scrubber");
+  if (_timeLabels.length > 1) {
+    scrubber.style.display = "flex";
+    const slider = document.getElementById("ts-slider");
+    slider.max = _timeLabels.length - 1;
+    slider.value = _timeLabels.length - 1;
+    document.getElementById("ts-start").textContent = _timeLabels[0].slice(11,16);
+    document.getElementById("ts-end").textContent = _timeLabels[_timeLabels.length-1].slice(11,16);
+    document.getElementById("ts-current").textContent = _timeLabels[_timeLabels.length-1].slice(11,16);
+  } else {
+    scrubber.style.display = "none";
+  }
+}
+
+function scrubTime(idx) {
+  idx = parseInt(idx);
+  const cutoff = _timeLabels[idx];
+  document.getElementById("ts-current").textContent = cutoff.slice(11,16);
+  // Update charts to show data up to cutoff
+  for (const key of Object.keys(_allMetrics)) {
+    const data = _allMetrics[key];
+    const filtered = data.filter(d => d.timestamp <= cutoff);
+    const chart = charts[key];
+    if (!chart) continue;
+    chart.data.labels = filtered.map(d => d.timestamp.slice(11,16));
+    chart.data.datasets[0].data = filtered.map(d => d.value);
+    chart.update("none");
+  }
+  // Filter alerts up to cutoff
+  const visAlerts = _allAlerts.filter(a => a.opened_at <= cutoff);
+  document.getElementById("alerts-list").innerHTML = visAlerts.length === 0
+    ? '<em style="color:#6e7681">No alerts yet</em>'
+    : visAlerts.map(a => `<div class="alert-row">
+        <div><span class="sev-${a.severity}">[${a.severity.toUpperCase()}]</span> <span class="svc">${a.service}</span> ${a.rule_id}</div>
+        <div class="ts">${a.opened_at.slice(11,19)}</div>
+      </div>`).join("");
+  // Filter log patterns up to cutoff (use first_seen if available, else show all)
+  const visLogs = _allLogs.filter(lp => !lp.first_seen || lp.first_seen <= cutoff);
+  document.getElementById("log-patterns-list").innerHTML = visLogs.length === 0
+    ? '<em style="color:#6e7681">No patterns yet</em>'
+    : visLogs.map(lp => `<div class="log-pattern">
+        <span class="pcount">${lp.count}x</span><span class="svc">${lp.service}</span>
+        <div class="pat">${escapeHtml(lp.pattern)}</div>
+      </div>`).join("");
+}
+
+async function renderTopology() {
+  const topo = await fetchJSON("/api/topology");
+  const container = document.getElementById("topology");
+  container.innerHTML = "";
+  const w = container.clientWidth || 600, h = 340;
+  const svg = d3.select(container).append("svg").attr("width", w).attr("height", h);
+  const g = svg.append("g");
+
+  // Zoom + pan
+  svg.call(d3.zoom().scaleExtent([0.3, 4]).on("zoom", e => g.attr("transform", e.transform)));
+
+  const sim = d3.forceSimulation(topo.nodes)
+    .force("link", d3.forceLink(topo.edges).id(d => d.id).distance(70))
+    .force("charge", d3.forceManyBody().strength(-120))
+    .force("center", d3.forceCenter(w/2, h/2))
+    .force("x", d3.forceX(w/2).strength(0.05))
+    .force("y", d3.forceY(h/2).strength(0.05))
+    .force("collide", d3.forceCollide(30));
+
+  const link = g.append("g").selectAll("line").data(topo.edges).enter().append("line").attr("class", "edge");
+  const node = g.append("g").selectAll("g").data(topo.nodes).enter().append("g")
+    .attr("class", d => "node" + (alertingServices.has(d.id) ? " alerting" : " healthy") + (d.id === rootService ? " root" : ""));
+
+  // Drag behavior
+  node.call(d3.drag()
+    .on("start", (e,d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+    .on("drag", (e,d) => { d.fx = e.x; d.fy = e.y; })
+    .on("end", (e,d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+  node.append("circle").attr("r", d => d.id === rootService ? 11 : 7);
+  node.append("text").text(d => shortLabel(d.id)).attr("dx", 12).attr("dy", 4)
+    .append("title").text(d => d.id);
+  sim.on("tick", () => {
+    link.attr("x1", d => d.source.x).attr("y1", d => d.source.y).attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+  });
+}
+
+let isPaused = false;
+
+function setPauseButton(enabled, label) {
+  const btn = document.getElementById("pause-btn");
+  btn.disabled = !enabled;
+  btn.textContent = label;
+}
+
+async function triggerLive() {
+  if (!currentScenario) return;
+  const r = await fetch(`/api/trigger/${currentScenario}?speed=60`, { method: "POST" });
+  const j = await r.json();
+  if (j.status === "started") {
+    isPaused = false;
+    setPauseButton(true, "Pause");
+    window._liveAlertingServices = new Set();  // reset for fresh live RCA
+    document.getElementById("rca-content").innerHTML = '<em style="color:#6e7681">Live RCA — waiting for first alert...</em>';
+    document.getElementById("state").textContent = `REPLAYING ${currentScenario} (60x)`;
+    document.getElementById("state").classList.remove("idle");
+    // Pre-fill charts with fixed window so line grows left-to-right
+    const WINDOW = 120;
+    for (const key of Object.keys(charts)) {
+      charts[key].data.labels = Array(WINDOW).fill("");
+      charts[key].data.datasets[0].data = Array(WINDOW).fill(null);
+      charts[key]._liveIdx = 0;
+      charts[key].update("none");
+    }
+    document.getElementById("event-feed").innerHTML = "";
+    document.getElementById("alerts-list").innerHTML = '<em style="color:#6e7681">Waiting for alerts...</em>';
+    document.getElementById("log-patterns-list").innerHTML = '<em style="color:#6e7681">Waiting for patterns...</em>';
+  } else alert(JSON.stringify(j));
+}
+
+async function togglePause() {
+  if (!currentScenario) return;
+  const path = isPaused ? "/api/resume" : "/api/pause";
+  const r = await fetch(path, { method: "POST" });
+  const j = await r.json();
+  if (j.status === "paused") {
+    isPaused = true;
+    setPauseButton(true, "Resume");
+    const st = document.getElementById("state");
+    st.textContent = `PAUSED — ${currentScenario}`;
+    st.style.background = "#d29922";
+  } else if (j.status === "resumed") {
+    isPaused = false;
+    setPauseButton(true, "Pause");
+    const st = document.getElementById("state");
+    st.textContent = `REPLAYING ${currentScenario} (60x)`;
+    st.style.background = "";
+  } else alert(JSON.stringify(j));
+}
+
+async function stopReplay() {
+  await fetch("/api/stop", { method: "POST" });
+  isPaused = false;
+  setPauseButton(false, "Pause");
+  const st = document.getElementById("state");
+  st.textContent = "IDLE";
+  st.classList.add("idle");
+  st.style.background = "";
+}
+
+function connectSSE() {
+  const es = new EventSource("/stream");
+  const feed = document.getElementById("event-feed");
+  es.onopen = () => document.getElementById("sse-status").textContent = "connected";
+  es.onerror = () => document.getElementById("sse-status").textContent = "disconnected";
+  es.onmessage = e => {
+    try {
+      const evt = JSON.parse(e.data);
+      const div = document.createElement("div");
+      div.className = `evt evt-${evt.kind}`;
+      const t = evt.scenario_ts.slice(11,19);
+      let body = "";
+      if (evt.kind === "metric") {
+        body = `${t} <span style="color:#7ee787">${evt.payload.service}</span> ${evt.payload.metric} = ${evt.payload.value.toFixed(2)}`;
+        // Push live data into matching chart
+        const key = `${evt.payload.service}|${evt.payload.metric}`;
+        if (charts[key]) {
+          const chart = charts[key];
+          const idx = chart._liveIdx || 0;
+          if (idx < chart.data.labels.length) {
+            chart.data.labels[idx] = t.slice(0,5);
+            chart.data.datasets[0].data[idx] = evt.payload.value;
+            chart._liveIdx = idx + 1;
+          } else {
+            chart.data.labels.shift(); chart.data.labels.push(t.slice(0,5));
+            chart.data.datasets[0].data.shift(); chart.data.datasets[0].data.push(evt.payload.value);
+          }
+          chart.update("none");
+        }
+      }
+      else if (evt.kind === "alert") {
+        body = `${t} ALERT [${evt.payload.severity}] ${evt.payload.service} ${evt.payload.rule}`;
+        const alist = document.getElementById("alerts-list");
+        if (alist.querySelector("em")) alist.innerHTML = "";
+        alist.insertAdjacentHTML("afterbegin", `<div class="alert-row">
+          <div><span class="sev-${evt.payload.severity}">[${evt.payload.severity.toUpperCase()}]</span> <span class="svc">${evt.payload.service}</span> ${evt.payload.rule}</div>
+          <div class="ts">${t}</div>
+        </div>`);
+        // Live RCA: track services that have fired alerts and recompute on the fly.
+        if (!window._liveAlertingServices) window._liveAlertingServices = new Set();
+        const before = window._liveAlertingServices.size;
+        window._liveAlertingServices.add(evt.payload.service);
+        if (window._liveAlertingServices.size !== before && currentScenario) {
+          const list = [...window._liveAlertingServices].join(",");
+          fetch(`/api/rca/${currentScenario}?services=${encodeURIComponent(list)}`)
+            .then(r => r.json())
+            .then(rca => {
+              document.getElementById("rca-content").innerHTML =
+                rca.ranked_root_causes.map((r,i) => `<div class="rca-rank">
+                  <span class="rank">${i+1}.</span><span class="svc">${r.service}</span><span class="score">${r.score}</span>
+                </div>`).join("") +
+                `<div class="rca-explain"><b style="color:#d29922">Live (${rca.alerting_services.length} svc alerting):</b> recomputed on each new service alert</div>`;
+            });
+        }
+      }
+      else if (evt.kind === "log_pattern") {
+        body = `${t} LOG ${evt.payload.service} (${evt.payload.count}x) ${evt.payload.pattern.slice(0,80)}`;
+        const llist = document.getElementById("log-patterns-list");
+        if (llist.querySelector("em")) llist.innerHTML = "";
+        llist.insertAdjacentHTML("afterbegin", `<div class="log-pattern">
+          <span class="pcount">${evt.payload.count}x</span><span class="svc">${evt.payload.service}</span>
+          <div class="pat">${escapeHtml(evt.payload.pattern)}</div>
+        </div>`);
+      }
+      // Update live timestamp in state bar
+      document.getElementById("state").textContent = `REPLAYING ${currentScenario} (60x) — ${t}`;
+      div.innerHTML = body;
+      feed.insertBefore(div, feed.firstChild);
+      while (feed.children.length > 80) feed.removeChild(feed.lastChild);
+    } catch {}
+  };
+}
+
+function cleanId(s) { return s.replace(/[^a-z0-9]/gi, "_"); }
+function shortLabel(id) {
+  const clip = s => s.length > 28 ? s.slice(0, 25) + "..." : s;
+  // Collapse <name>:<name> doubles like "kube-apiserver:kube-apiserver"
+  const parts = id.split(":");
+  if (parts.length === 2 && parts[0] === parts[1]) return clip(parts[0]);
+  // Typed endpoints: kafka:/postgres:/redis: -> keep type + first hostname segment
+  if (parts.length >= 2 && /^(kafka|postgres|redis|mysql|mongo|memcached)$/.test(parts[0])) {
+    const host = (parts[1] || "").split(".")[0];
+    return clip(host ? `${parts[0]}:${host}` : parts[0]);
+  }
+  // AWS ELB pattern: <name>-<hash>.elb.<region>.example.com:<port>
+  const elb = id.match(/^([a-z0-9-]+?)(?:-[a-f0-9]{8,})?\.elb\..*:(\d+)$/i);
+  if (elb) return clip(`${elb[1]}:${elb[2]}`);
+  return clip(id);
+}
+function escapeHtml(s) { return (s || "").replace(/[<>&"']/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+loadScenarios();
+connectSSE();
+</script>
+</body>
+</html>

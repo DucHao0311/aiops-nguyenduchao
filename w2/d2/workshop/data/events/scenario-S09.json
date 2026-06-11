@@ -1,0 +1,34 @@
+{
+  "alerts": [
+    {
+      "id": "48cb4105e486",
+      "scenario": "S09",
+      "rule_id": "latency-p99-high",
+      "service": "roc-installment-service",
+      "severity": "warning",
+      "opened_at": "2026-06-09T16:16:00+00:00",
+      "phase": "active",
+      "note": null
+    },
+    {
+      "id": "9ebb9f8894d2",
+      "scenario": "S09",
+      "rule_id": "latency-p99-high",
+      "service": "esb",
+      "severity": "warning",
+      "opened_at": "2026-06-09T16:16:30+00:00",
+      "phase": "active",
+      "note": null
+    }
+  ],
+  "log_patterns": [
+    {
+      "scenario": "S09",
+      "service": "chaos-daemon",
+      "count": 4,
+      "pattern": "chaos-experiment cpu-burn started: load=100, duration=900s, pods=all",
+      "first_seen_at": "2026-06-09T16:15:30+00:00",
+      "phase": "active"
+    }
+  ]
+}

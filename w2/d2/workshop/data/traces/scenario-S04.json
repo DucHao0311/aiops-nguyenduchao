@@ -1,0 +1,82 @@
+[
+  {
+    "trace_id": "742630fd085bca17d78c974a1bb9c83a",
+    "phase": "pre",
+    "spans": [
+      {
+        "trace_id": "742630fd085bca17d78c974a1bb9c83a",
+        "span_id": "c37bca94fe8eac78",
+        "parent_id": null,
+        "service": "bb-edge",
+        "operation": "bb-edge/handle",
+        "start_time": "2026-06-09T11:07:30+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S04"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "fb91295549f6a51e89d13ea52b2f845f",
+    "phase": "active",
+    "spans": [
+      {
+        "trace_id": "fb91295549f6a51e89d13ea52b2f845f",
+        "span_id": "7bc91fae5f89a7c7",
+        "parent_id": null,
+        "service": "bb-edge",
+        "operation": "bb-edge/handle",
+        "start_time": "2026-06-09T11:22:30+00:00",
+        "duration_ms": 3000,
+        "status": "OK",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S04"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "076b659cbf15af755d36ae30eab39d0f",
+    "phase": "post",
+    "spans": [
+      {
+        "trace_id": "076b659cbf15af755d36ae30eab39d0f",
+        "span_id": "a1110b67f136b70c",
+        "parent_id": null,
+        "service": "bb-edge",
+        "operation": "bb-edge/handle",
+        "start_time": "2026-06-09T11:35:00+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S04"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "c1441a589a8ce55857dfd3c94b99278d",
+    "phase": "recovery",
+    "spans": [
+      {
+        "trace_id": "c1441a589a8ce55857dfd3c94b99278d",
+        "span_id": "e3d6252257dab7f0",
+        "parent_id": null,
+        "service": "bb-edge",
+        "operation": "bb-edge/handle",
+        "start_time": "2026-06-09T11:42:30+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S04"
+        }
+      }
+    ]
+  }
+]

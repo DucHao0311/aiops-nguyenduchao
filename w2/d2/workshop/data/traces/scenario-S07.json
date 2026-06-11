@@ -1,0 +1,194 @@
+[
+  {
+    "trace_id": "cb825544c268bdfff8fb51427283633a",
+    "phase": "pre",
+    "spans": [
+      {
+        "trace_id": "cb825544c268bdfff8fb51427283633a",
+        "span_id": "e0296b1fd0eb6ba1",
+        "parent_id": null,
+        "service": "bb-confirmation-service",
+        "operation": "bb-confirmation-service/handle",
+        "start_time": "2026-06-09T14:07:30+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S07"
+        }
+      },
+      {
+        "trace_id": "cb825544c268bdfff8fb51427283633a",
+        "span_id": "30e3bac9c70a23ae",
+        "parent_id": "e0296b1fd0eb6ba1",
+        "service": "roc-installment-service",
+        "operation": "roc-installment-service/handle",
+        "start_time": "2026-06-09T14:07:30.001000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S07"
+        }
+      },
+      {
+        "trace_id": "cb825544c268bdfff8fb51427283633a",
+        "span_id": "68a94f0c14f29540",
+        "parent_id": "30e3bac9c70a23ae",
+        "service": "bb-edge",
+        "operation": "bb-edge/handle",
+        "start_time": "2026-06-09T14:07:30.002000+00:00",
+        "duration_ms": 50,
+        "status": "OK",
+        "attributes": {
+          "phase": "pre",
+          "scenario": "S07"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "a28c0c8fa696dc542361ca84444399a3",
+    "phase": "active",
+    "spans": [
+      {
+        "trace_id": "a28c0c8fa696dc542361ca84444399a3",
+        "span_id": "1afb2519814eb3ac",
+        "parent_id": null,
+        "service": "bb-confirmation-service",
+        "operation": "bb-confirmation-service/handle",
+        "start_time": "2026-06-09T14:22:30+00:00",
+        "duration_ms": 250,
+        "status": "OK",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S07"
+        }
+      },
+      {
+        "trace_id": "a28c0c8fa696dc542361ca84444399a3",
+        "span_id": "f152f19fd9e9633d",
+        "parent_id": "1afb2519814eb3ac",
+        "service": "roc-installment-service",
+        "operation": "roc-installment-service/handle",
+        "start_time": "2026-06-09T14:22:30.001000+00:00",
+        "duration_ms": 250,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S07"
+        }
+      },
+      {
+        "trace_id": "a28c0c8fa696dc542361ca84444399a3",
+        "span_id": "f310778abdc0506f",
+        "parent_id": "f152f19fd9e9633d",
+        "service": "bb-edge",
+        "operation": "bb-edge/handle",
+        "start_time": "2026-06-09T14:22:30.002000+00:00",
+        "duration_ms": 3000,
+        "status": "ERROR",
+        "attributes": {
+          "phase": "active",
+          "scenario": "S07"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "d7a6811caa3e1bcad50616bc50875f17",
+    "phase": "post",
+    "spans": [
+      {
+        "trace_id": "d7a6811caa3e1bcad50616bc50875f17",
+        "span_id": "d156229da9887027",
+        "parent_id": null,
+        "service": "bb-confirmation-service",
+        "operation": "bb-confirmation-service/handle",
+        "start_time": "2026-06-09T14:35:00+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S07"
+        }
+      },
+      {
+        "trace_id": "d7a6811caa3e1bcad50616bc50875f17",
+        "span_id": "369e0ebb247ec9e0",
+        "parent_id": "d156229da9887027",
+        "service": "roc-installment-service",
+        "operation": "roc-installment-service/handle",
+        "start_time": "2026-06-09T14:35:00.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S07"
+        }
+      },
+      {
+        "trace_id": "d7a6811caa3e1bcad50616bc50875f17",
+        "span_id": "553ecee871cb6331",
+        "parent_id": "369e0ebb247ec9e0",
+        "service": "bb-edge",
+        "operation": "bb-edge/handle",
+        "start_time": "2026-06-09T14:35:00.002000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "post",
+          "scenario": "S07"
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "2b611e3f811e3500d4d50ff7d43aa3a6",
+    "phase": "recovery",
+    "spans": [
+      {
+        "trace_id": "2b611e3f811e3500d4d50ff7d43aa3a6",
+        "span_id": "18a285171d806787",
+        "parent_id": null,
+        "service": "bb-confirmation-service",
+        "operation": "bb-confirmation-service/handle",
+        "start_time": "2026-06-09T14:42:30+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S07"
+        }
+      },
+      {
+        "trace_id": "2b611e3f811e3500d4d50ff7d43aa3a6",
+        "span_id": "c9924246cba5c5d7",
+        "parent_id": "18a285171d806787",
+        "service": "roc-installment-service",
+        "operation": "roc-installment-service/handle",
+        "start_time": "2026-06-09T14:42:30.001000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S07"
+        }
+      },
+      {
+        "trace_id": "2b611e3f811e3500d4d50ff7d43aa3a6",
+        "span_id": "f0cc3ff35ae0a41b",
+        "parent_id": "c9924246cba5c5d7",
+        "service": "bb-edge",
+        "operation": "bb-edge/handle",
+        "start_time": "2026-06-09T14:42:30.002000+00:00",
+        "duration_ms": 80,
+        "status": "OK",
+        "attributes": {
+          "phase": "recovery",
+          "scenario": "S07"
+        }
+      }
+    ]
+  }
+]

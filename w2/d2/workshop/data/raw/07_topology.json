@@ -1,0 +1,61 @@
+{
+  "xlw2hq4x:backbase:Deployment:bb-edge": {
+    "upstreams": [
+      "xlw2hq4x:dynatrace:StatefulSet:roc-aws-agents-activegate",
+      "xlw2hq4x:roc-services:Deployment:roc-installment-service"
+    ],
+    "downstreams": [
+      "xlw2hq4x:backbase:Deployment:bb-edge"
+    ],
+    "external_deps": []
+  },
+  "xlw2hq4x:chaos-mesh:DaemonSet:chaos-daemon": {
+    "upstreams": [],
+    "downstreams": [],
+    "external_deps": []
+  },
+  "xlw2hq4x:roc-services:Deployment:roc-installment-service": {
+    "upstreams": [
+      "xlw2hq4x:backbase:Deployment:bb-confirmation-service",
+      "xlw2hq4x:dynatrace:StatefulSet:roc-aws-agents-activegate",
+      "xlw2hq4x:roc-services:Deployment:roc-user-manager-service"
+    ],
+    "downstreams": [
+      "xlw2hq4x:roc-services:Deployment:roc-installment-service"
+    ],
+    "external_deps": [
+      "kafka:b-1.kafka.example.com:9094",
+      "kafka:b-2.kafka.example.com:9094",
+      "kafka:b-3.kafka.example.com:9094",
+      "kube-apiserver:kube-apiserver",
+      "redis:master.roc-installment-demo-redis.bsreex.example.com:6379",
+      "onprem-sim.example.com:8085",
+      "postgres:roc-installment-demo-postgres.example.com:5432"
+    ]
+  },
+  "xlw2hq4x:services:Deployment:datapower": {
+    "upstreams": [
+      "xlw2hq4x:dynatrace:StatefulSet:roc-onprem-agents-activegate",
+      "xlw2hq4x:services:Deployment:esb"
+    ],
+    "downstreams": [
+      "xlw2hq4x:services:Deployment:datapower"
+    ],
+    "external_deps": [
+      "gateway.example.com:8083"
+    ]
+  },
+  "xlw2hq4x:services:Deployment:esb": {
+    "upstreams": [
+      "xlw2hq4x:dynatrace:StatefulSet:roc-onprem-agents-activegate",
+      "xlw2hq4x:services:Deployment:datapower",
+      "xlw2hq4x:services:Deployment:t24-service"
+    ],
+    "downstreams": [
+      "xlw2hq4x:services:Deployment:esb"
+    ],
+    "external_deps": [
+      "gateway.example.com:8086"
+    ]
+  }
+}
