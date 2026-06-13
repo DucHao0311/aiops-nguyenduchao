@@ -1,0 +1,95 @@
+{
+  "clusters_analyzed": 2,
+  "results": [
+    {
+      "cluster_id": "c-001-000",
+      "graph_top3": [
+        [
+          "checkout-svc",
+          0.647
+        ],
+        [
+          "payment-svc",
+          0.6421
+        ],
+        [
+          "edge-lb",
+          0.6235
+        ]
+      ],
+      "root_cause": "checkout-svc",
+      "class": "ddos",
+      "confidence": 0.5298,
+      "actions": [
+        "Enable WAF rate limiting",
+        "Enable Cloudflare proxy/DDoS protection",
+        "Add geographic block rules",
+        "Monitor upstream recovery"
+      ],
+      "reasoning": "Graph traversal identifies 'checkout-svc' as top candidate (score=0.647): earliest alert in cluster, upstream in-degree=1, high downstream impact in cluster. kNN retrieval top-1: 'INC-2026-03-20' (sim=0.434): Volumetric DDoS 5x normal traffic. Edge-lb saturate, all upstream visible degraded.... Classification: 'ddos', confidence=0.5298.",
+      "similar_incidents": [
+        "INC-2026-03-20",
+        "INC-2025-11-08",
+        "INC-2025-07-04"
+      ],
+      "method": "graph+retrieval+llm_enriched",
+      "llm_confidence": 0.56,
+      "auto_remediate": false,
+      "bonus": {
+        "decision_tree_class": "ddos",
+        "decision_tree_confidence": 1.0,
+        "tfidf_top1_incident": "INC-2026-03-20",
+        "method_accuracy_comparison": {
+          "knn_loo": 0.069,
+          "tfidf_loo": 0.172,
+          "decision_tree_cv": 0.0
+        }
+      }
+    },
+    {
+      "cluster_id": "c-002-001",
+      "graph_top3": [
+        [
+          "recommender-svc",
+          0.5542
+        ],
+        [
+          "N/A",
+          0.0
+        ],
+        [
+          "N/A",
+          0.0
+        ]
+      ],
+      "root_cause": "recommender-svc",
+      "class": "memory_leak",
+      "confidence": 0.5979,
+      "actions": [
+        "Rollback recommender-svc to last stable version",
+        "Add gc.collect() in request handler",
+        "Set memory limit + OOM restart policy",
+        "Add memory utilization alert at 80%"
+      ],
+      "reasoning": "Graph traversal identifies 'recommender-svc' as top candidate (score=0.554): earliest alert in cluster, upstream in-degree=1, high downstream impact in cluster. kNN retrieval top-1: 'INC-2025-08-02' (sim=0.645): Recommender OOM mỗi 4h sau deploy v3.1. Pandas DataFrame không release giữa request.... Classification: 'memory_leak', confidence=0.5979.",
+      "similar_incidents": [
+        "INC-2025-08-02",
+        "INC-2025-10-28",
+        "INC-2026-06-02"
+      ],
+      "method": "graph+retrieval+llm_enriched",
+      "llm_confidence": 0.618,
+      "auto_remediate": false,
+      "bonus": {
+        "decision_tree_class": "bad_deploy",
+        "decision_tree_confidence": 0.083,
+        "tfidf_top1_incident": "INC-2026-04-15",
+        "method_accuracy_comparison": {
+          "knn_loo": 0.069,
+          "tfidf_loo": 0.172,
+          "decision_tree_cv": 0.0
+        }
+      }
+    }
+  ]
+}
