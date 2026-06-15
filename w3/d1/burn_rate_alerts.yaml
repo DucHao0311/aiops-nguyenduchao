@@ -1,0 +1,220 @@
+groups:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # API — SLO 99.9% (error_budget = 0.1%)
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: api-slo
+    rules:
+
+      # Tier 1 — URGENT PAGE
+      # Burns ≥ 2% budget in 1 h → exhausts budget in < 50 h
+      # Threshold = 0.02 / (1h / 720h) = 14.4
+      - alert: api_burn_rate_tier1
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5..|429"}[1h]))
+            / sum(rate(http_requests_total[1h]))
+          ) / (1 - 0.999) >= 14.4
+          AND
+          (
+            sum(rate(http_requests_total{status=~"5..|429"}[5m]))
+            / sum(rate(http_requests_total[5m]))
+          ) / (1 - 0.999) >= 14.4
+        labels:
+          severity: page
+          tier: "1"
+          service: api
+        annotations:
+          summary: "API SLO Tier-1 burn rate ≥ 14.4 (both 1h + 5m windows)"
+          description: >
+            API is burning error budget at ≥ 14.4× baseline.
+            At this rate the 30-day budget (20 738 failures) will be exhausted in < 50 hours.
+          runbook: "https://runbooks.example.com/api-slo-tier1"
+
+      # Tier 2 — PAGE (slower-developing incident)
+      # Burns ≥ 5% budget in 6 h → threshold = 0.05 / (6h / 720h) = 6
+      - alert: api_burn_rate_tier2
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5..|429"}[6h]))
+            / sum(rate(http_requests_total[6h]))
+          ) / (1 - 0.999) >= 6
+          AND
+          (
+            sum(rate(http_requests_total{status=~"5..|429"}[30m]))
+            / sum(rate(http_requests_total[30m]))
+          ) / (1 - 0.999) >= 6
+        labels:
+          severity: page
+          tier: "2"
+          service: api
+        annotations:
+          summary: "API SLO Tier-2 burn rate ≥ 6 (both 6h + 30m windows)"
+          description: >
+            API is burning error budget at ≥ 6× baseline.
+            Expected budget exhaustion within ~5 days if unaddressed.
+          runbook: "https://runbooks.example.com/api-slo-tier2"
+
+      # Tier 3 — TICKET (slow burn, business-hours follow-up)
+      # Burns ≥ 10% budget in 3 d → threshold = 0.10 / (72h / 720h) = 1
+      - alert: api_burn_rate_tier3
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5..|429"}[3d]))
+            / sum(rate(http_requests_total[3d]))
+          ) / (1 - 0.999) >= 1
+          AND
+          (
+            sum(rate(http_requests_total{status=~"5..|429"}[6h]))
+            / sum(rate(http_requests_total[6h]))
+          ) / (1 - 0.999) >= 1
+        labels:
+          severity: ticket
+          tier: "3"
+          service: api
+        annotations:
+          summary: "API SLO Tier-3 slow burn rate ≥ 1 (both 3d + 6h windows)"
+          description: >
+            API burn rate elevated at or above baseline for 3 days.
+            File ticket; no immediate page required.
+          runbook: "https://runbooks.example.com/api-slo-tier3"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DB — SLO 99.95% (error_budget = 0.05%)
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: db-slo
+    rules:
+
+      # Tier 1 — URGENT PAGE
+      # Threshold = 0.02 / (1h / 720h) = 14.4
+      - alert: db_burn_rate_tier1
+        expr: |
+          (
+            sum(rate(db_queries_total{success="false"}[1h]))
+            / sum(rate(db_queries_total[1h]))
+          ) / (1 - 0.9995) >= 14.4
+          AND
+          (
+            sum(rate(db_queries_total{success="false"}[5m]))
+            / sum(rate(db_queries_total[5m]))
+          ) / (1 - 0.9995) >= 14.4
+        labels:
+          severity: page
+          tier: "1"
+          service: db
+        annotations:
+          summary: "DB SLO Tier-1 burn rate ≥ 14.4 (both 1h + 5m windows)"
+          description: >
+            DB is burning error budget at ≥ 14.4× baseline.
+            Budget (863 allowed failures/month) will be exhausted quickly.
+          runbook: "https://runbooks.example.com/db-slo-tier1"
+
+      # Tier 2 — PAGE
+      - alert: db_burn_rate_tier2
+        expr: |
+          (
+            sum(rate(db_queries_total{success="false"}[6h]))
+            / sum(rate(db_queries_total[6h]))
+          ) / (1 - 0.9995) >= 6
+          AND
+          (
+            sum(rate(db_queries_total{success="false"}[30m]))
+            / sum(rate(db_queries_total[30m]))
+          ) / (1 - 0.9995) >= 6
+        labels:
+          severity: page
+          tier: "2"
+          service: db
+        annotations:
+          summary: "DB SLO Tier-2 burn rate ≥ 6 (both 6h + 30m windows)"
+          runbook: "https://runbooks.example.com/db-slo-tier2"
+
+      # Tier 3 — TICKET
+      - alert: db_burn_rate_tier3
+        expr: |
+          (
+            sum(rate(db_queries_total{success="false"}[3d]))
+            / sum(rate(db_queries_total[3d]))
+          ) / (1 - 0.9995) >= 1
+          AND
+          (
+            sum(rate(db_queries_total{success="false"}[6h]))
+            / sum(rate(db_queries_total[6h]))
+          ) / (1 - 0.9995) >= 1
+        labels:
+          severity: ticket
+          tier: "3"
+          service: db
+        annotations:
+          summary: "DB SLO Tier-3 slow burn (both 3d + 6h windows)"
+          runbook: "https://runbooks.example.com/db-slo-tier3"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Frontend — SLO 99.0% (error_budget = 1.0%)
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: frontend-slo
+    rules:
+
+      # Tier 1 — URGENT PAGE
+      # Threshold = 0.02 / (1h / 720h) = 14.4
+      - alert: frontend_burn_rate_tier1
+        expr: |
+          (
+            sum(rate(frontend_page_views_total{js_error="true"}[1h]))
+            / sum(rate(frontend_page_views_total[1h]))
+          ) / (1 - 0.99) >= 14.4
+          AND
+          (
+            sum(rate(frontend_page_views_total{js_error="true"}[5m]))
+            / sum(rate(frontend_page_views_total[5m]))
+          ) / (1 - 0.99) >= 14.4
+        labels:
+          severity: page
+          tier: "1"
+          service: frontend
+        annotations:
+          summary: "Frontend SLO Tier-1 burn rate ≥ 14.4 (both 1h + 5m windows)"
+          description: >
+            Frontend is burning SLO budget at ≥ 14.4× baseline.
+            Budget (51 840 allowed failures/month) exhausting rapidly.
+          runbook: "https://runbooks.example.com/frontend-slo-tier1"
+
+      # Tier 2 — PAGE
+      - alert: frontend_burn_rate_tier2
+        expr: |
+          (
+            sum(rate(frontend_page_views_total{js_error="true"}[6h]))
+            / sum(rate(frontend_page_views_total[6h]))
+          ) / (1 - 0.99) >= 6
+          AND
+          (
+            sum(rate(frontend_page_views_total{js_error="true"}[30m]))
+            / sum(rate(frontend_page_views_total[30m]))
+          ) / (1 - 0.99) >= 6
+        labels:
+          severity: page
+          tier: "2"
+          service: frontend
+        annotations:
+          summary: "Frontend SLO Tier-2 burn rate ≥ 6 (both 6h + 30m windows)"
+          runbook: "https://runbooks.example.com/frontend-slo-tier2"
+
+      # Tier 3 — TICKET
+      - alert: frontend_burn_rate_tier3
+        expr: |
+          (
+            sum(rate(frontend_page_views_total{js_error="true"}[3d]))
+            / sum(rate(frontend_page_views_total[3d]))
+          ) / (1 - 0.99) >= 1
+          AND
+          (
+            sum(rate(frontend_page_views_total{js_error="true"}[6h]))
+            / sum(rate(frontend_page_views_total[6h]))
+          ) / (1 - 0.99) >= 1
+        labels:
+          severity: ticket
+          tier: "3"
+          service: frontend
+        annotations:
+          summary: "Frontend SLO Tier-3 slow burn (both 3d + 6h windows)"
+          runbook: "https://runbooks.example.com/frontend-slo-tier3"
