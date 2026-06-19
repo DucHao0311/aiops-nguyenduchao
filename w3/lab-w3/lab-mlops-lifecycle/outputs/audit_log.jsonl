@@ -1,6 +1,0 @@
-{"timestamp": "2026-06-19T08:21:33.286332", "event": "holdout_validation", "v2_precision": 0.0, "v2_recall": 0.0}
-{"timestamp": "2026-06-19T08:25:30.776556", "event": "holdout_validation", "v2_precision": 1.0, "v2_recall": null, "fpr": 0.0, "note": "holdout_all_normal_fpr_proxy"}
-{"timestamp": "2026-06-19T08:28:05.640616", "event": "holdout_validation", "v2_precision": 1.0, "v2_recall": null, "fpr": 0.0, "note": "holdout_all_normal_fpr_proxy"}
-{"timestamp": "2026-06-19T08:28:22.240334", "event": "promote_v2", "v2_version": "5", "v1_version": "2", "drift_score": 1.0}
-{"timestamp": "2026-06-19T08:28:27.148734", "event": "post_deploy_cycle", "cycle": 1, "precision": 0.4, "recall": 1.0, "v2": "5"}
-{"timestamp": "2026-06-19T08:28:27.232001", "event": "auto_rollback_v2_to_v1", "demoted_version": "5", "restored_version": "2", "trigger_precision": 0.4, "threshold": 0.65, "cycle": 1}
