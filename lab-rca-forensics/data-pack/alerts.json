@@ -1,0 +1,275 @@
+[
+  {
+    "id": "A-001",
+    "name": "CheckoutP99High",
+    "service": "checkout-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-05T14:32:15Z",
+    "summary": "p99 latency above 1500 ms for 2 minutes",
+    "labels": {
+      "metric": "checkout_p99_ms",
+      "threshold_ms": 1500
+    }
+  },
+  {
+    "id": "A-002",
+    "name": "CheckoutErrorRateHigh",
+    "service": "checkout-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-05T14:33:00Z",
+    "summary": "error rate above 5% for 1 minute",
+    "labels": {
+      "metric": "checkout_error_rate",
+      "threshold": 0.05
+    }
+  },
+  {
+    "id": "A-003",
+    "name": "RedisHitRateLow",
+    "service": "redis-cache",
+    "severity": "warning",
+    "fired_at": "2026-03-05T14:34:30Z",
+    "summary": "hit rate below 70% for 1 minute",
+    "labels": {
+      "metric": "redis_hit_rate",
+      "threshold": 0.7
+    }
+  },
+  {
+    "id": "A-004",
+    "name": "PaymentConnPoolSaturated",
+    "service": "payment-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-05T14:35:00Z",
+    "summary": "outbound HTTP connection pool > 90% utilization",
+    "labels": {
+      "metric": "payment_conn_pool_active",
+      "threshold_pct": 90,
+      "pool_max": 200
+    }
+  },
+  {
+    "id": "A-005",
+    "name": "RdsCpuHigh",
+    "service": "rds-orders",
+    "severity": "warning",
+    "fired_at": "2026-03-05T14:36:00Z",
+    "summary": "CPU above 80% for 1 minute",
+    "labels": {
+      "metric": "rds_cpu_pct",
+      "threshold_pct": 80
+    }
+  },
+  {
+    "id": "A-007",
+    "name": "SyntheticCheckoutFailing",
+    "service": "checkout-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-05T14:36:00Z",
+    "summary": "external synthetic check for /checkout failed 3 times",
+    "labels": {
+      "check": "synthetic_checkout_v2"
+    }
+  },
+  {
+    "id": "A-006",
+    "name": "PaymentMemoryHigh",
+    "service": "payment-svc",
+    "severity": "warning",
+    "fired_at": "2026-03-05T14:38:00Z",
+    "summary": "heap usage above 85%",
+    "labels": {
+      "metric": "payment_memory_pct",
+      "threshold_pct": 85
+    }
+  },
+  {
+    "id": "A-008",
+    "name": "FxApi5xxObserved",
+    "service": "payment-svc",
+    "severity": "info",
+    "fired_at": "2026-03-05T14:39:00Z",
+    "summary": "non-zero 5xx from fx-api over 5 min window",
+    "labels": {
+      "metric": "fx_api_5xx_per_min",
+      "threshold": 1
+    }
+  },
+  {
+    "id": "A-101",
+    "name": "InventoryP99High",
+    "service": "inventory-svc",
+    "severity": "warning",
+    "fired_at": "2026-03-11T02:45:00Z",
+    "summary": "p99 latency above 150 ms for 5 minutes",
+    "labels": {
+      "metric": "inventory_p99_ms",
+      "threshold_ms": 150
+    }
+  },
+  {
+    "id": "A-102",
+    "name": "InventoryMemoryHigh",
+    "service": "inventory-svc",
+    "severity": "warning",
+    "fired_at": "2026-03-11T03:00:00Z",
+    "summary": "RSS above 2000 MB and growing",
+    "labels": {
+      "metric": "inventory_memory_mb",
+      "threshold_mb": 2000
+    }
+  },
+  {
+    "id": "A-103",
+    "name": "CheckoutErrorRateHigh",
+    "service": "checkout-svc",
+    "severity": "warning",
+    "fired_at": "2026-03-11T03:20:00Z",
+    "summary": "error rate above 3% for 5 minutes",
+    "labels": {
+      "metric": "checkout_error_rate",
+      "threshold": 0.03
+    }
+  },
+  {
+    "id": "A-104",
+    "name": "InventoryOOMKilled",
+    "service": "inventory-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-11T04:18:00Z",
+    "summary": "container OOM-killed",
+    "labels": {
+      "metric": "inventory_oom_kills_per_min"
+    }
+  },
+  {
+    "id": "A-501",
+    "name": "SyntheticCheckoutFailing",
+    "service": "checkout-svc",
+    "severity": "warning",
+    "fired_at": "2026-03-14T02:15:00Z",
+    "summary": "synthetic check elevated latency",
+    "labels": {
+      "check": "synthetic_checkout_v2"
+    }
+  },
+  {
+    "id": "A-201",
+    "name": "CheckoutP99High",
+    "service": "checkout-svc",
+    "severity": "warning",
+    "fired_at": "2026-03-17T11:18:00Z",
+    "summary": "p99 latency above 1000 ms for 2 minutes",
+    "labels": {
+      "metric": "checkout_p99_ms",
+      "threshold_ms": 1000
+    }
+  },
+  {
+    "id": "A-202",
+    "name": "RdsQueryP99High",
+    "service": "rds-orders",
+    "severity": "warning",
+    "fired_at": "2026-03-17T11:19:00Z",
+    "summary": "p99 query latency above 1000 ms",
+    "labels": {
+      "metric": "rds_query_p99_ms",
+      "threshold_ms": 1000
+    }
+  },
+  {
+    "id": "A-204",
+    "name": "RdsCpuHigh",
+    "service": "rds-orders",
+    "severity": "info",
+    "fired_at": "2026-03-17T11:21:00Z",
+    "summary": "CPU above 65% for 5 minutes",
+    "labels": {
+      "metric": "rds_cpu_pct",
+      "threshold_pct": 65
+    }
+  },
+  {
+    "id": "A-203",
+    "name": "PaymentConnPoolSaturated",
+    "service": "payment-svc",
+    "severity": "warning",
+    "fired_at": "2026-03-17T11:25:00Z",
+    "summary": "outbound HTTP connection pool > 90% utilization",
+    "labels": {
+      "metric": "payment_conn_pool_active",
+      "threshold_pct": 90,
+      "pool_max": 50
+    }
+  },
+  {
+    "id": "A-301",
+    "name": "CheckoutErrorRateHigh",
+    "service": "checkout-svc",
+    "severity": "warning",
+    "fired_at": "2026-03-22T09:02:00Z",
+    "summary": "error rate above 3% for 1 minute",
+    "labels": {
+      "metric": "checkout_error_rate",
+      "threshold": 0.03
+    }
+  },
+  {
+    "id": "A-302",
+    "name": "PaymentRegionalErrorRateHigh",
+    "service": "payment-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-22T09:03:00Z",
+    "summary": "per-AZ error rate exceeded 20% on one or more zones",
+    "labels": {
+      "metric": "payment_per_az_error_rate",
+      "threshold": 0.2
+    }
+  },
+  {
+    "id": "A-303",
+    "name": "PaymentRetriesElevated",
+    "service": "payment-svc",
+    "severity": "info",
+    "fired_at": "2026-03-22T09:05:00Z",
+    "summary": "outbound retries elevated",
+    "labels": {
+      "metric": "payment_retries_per_min"
+    }
+  },
+  {
+    "id": "A-401",
+    "name": "MtlsHandshakeFailureSpike",
+    "service": "checkout-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-27T06:00:45Z",
+    "summary": "mTLS handshake failures > 100/min",
+    "labels": {
+      "metric": "mtls_handshake_failures_per_min",
+      "threshold_per_min": 100
+    }
+  },
+  {
+    "id": "A-402",
+    "name": "CheckoutErrorRateHigh",
+    "service": "checkout-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-27T06:01:00Z",
+    "summary": "error rate above 20%",
+    "labels": {
+      "metric": "checkout_error_rate",
+      "threshold": 0.2
+    }
+  },
+  {
+    "id": "A-403",
+    "name": "SyntheticCheckoutFailing",
+    "service": "checkout-svc",
+    "severity": "critical",
+    "fired_at": "2026-03-27T06:02:00Z",
+    "summary": "external synthetic check failed 3 times",
+    "labels": {
+      "check": "synthetic_checkout_v2"
+    }
+  }
+]

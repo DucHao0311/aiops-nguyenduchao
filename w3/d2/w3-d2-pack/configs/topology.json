@@ -1,0 +1,27 @@
+{
+  "services": [
+    "frontend",
+    "api-gateway",
+    "checkout-svc",
+    "payment-svc",
+    "inventory-svc",
+    "notification-svc",
+    "auth-svc",
+    "log-collector",
+    "dns-resolver",
+    "cache-svc"
+  ],
+  "edges": [
+    {"from": "frontend",       "to": "api-gateway"},
+    {"from": "api-gateway",    "to": "checkout-svc"},
+    {"from": "api-gateway",    "to": "auth-svc"},
+    {"from": "api-gateway",    "to": "notification-svc"},
+    {"from": "api-gateway",    "to": "log-collector"},
+    {"from": "api-gateway",    "to": "dns-resolver"},
+    {"from": "checkout-svc",   "to": "payment-svc"},
+    {"from": "checkout-svc",   "to": "inventory-svc"},
+    {"from": "payment-svc",    "to": "cache-svc"},
+    {"from": "inventory-svc",  "to": "cache-svc"}
+  ],
+  "description": "W3-D2 lab topology — 10 services matching chaos experiment targets"
+}

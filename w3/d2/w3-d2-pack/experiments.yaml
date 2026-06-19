@@ -1,0 +1,257 @@
+# experiments.yaml — 10 chaos experiments for W3-D2
+# All 5 mandatory fields per §5: name, hypothesis, blast_radius, rollback, measurement, ground_truth
+
+experiments:
+
+  - id: 1
+    name: payment_latency
+    fault_type: latency
+    target: payment-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, checkout p99 latency < 500ms.
+      Injecting 500ms ± 100ms delay on payment-svc network egress for 60s,
+      pipeline detector fires latency anomaly within 30s and RCA picks payment-svc.
+      probe pass-rate may drop to 70-80% during inject (acceptable degradation).
+    blast_radius:
+      target: 1 instance of payment-svc (container ronki-payment-svc)
+      duration_seconds: 60
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 50% for 20s
+      method: docker exec ronki-payment-svc tc qdisc del dev eth0 root
+    measurement:
+      metrics: [probe_pass_rate, p99_latency_payment, detector_alerts, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: payment-svc
+      expected_fault_class: latency
+
+  - id: 2
+    name: payment_packet_loss
+    fault_type: network_loss
+    target: payment-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, payment error rate < 2%.
+      Injecting 30% packet loss on payment-svc egress for 60s causes TCP
+      retransmission storms and elevated 5xx errors. Pipeline detector fires
+      HighErrorRate alert within 45s and RCA picks payment-svc as root cause.
+      Checkout-svc may show downstream errors but should NOT be picked as root.
+    blast_radius:
+      target: 1 instance of payment-svc (container ronki-payment-svc)
+      duration_seconds: 60
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 40% for 20s
+      method: docker exec ronki-payment-svc tc qdisc del dev eth0 root
+    measurement:
+      metrics: [probe_pass_rate, payment_error_rate, checkout_error_rate, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: payment-svc
+      expected_fault_class: network_loss
+
+  - id: 3
+    name: inventory_pod_kill
+    fault_type: availability
+    target: inventory-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, inventory-svc up == 1.
+      Killing inventory-svc container every 60s (3 kills total over 180s)
+      triggers InstanceDown alert within 35s each time. RCA picks inventory-svc
+      as root. Checkout-svc shows upstream dependency errors but is symptom, not root.
+    blast_radius:
+      target: 1 instance of inventory-svc (container ronki-inventory-svc)
+      duration_seconds: 180
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 30% for 30s
+      method: docker start ronki-inventory-svc
+    measurement:
+      metrics: [probe_pass_rate, inventory_up, checkout_error_rate, rca_root_service]
+      capture_window_seconds: 360
+    ground_truth:
+      expected_root_service: inventory-svc
+      expected_fault_class: availability
+
+  - id: 4
+    name: api_gateway_cpu_stress
+    fault_type: cpu_saturation
+    target: api-gateway
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, api-gateway p99 < 200ms.
+      Stressing api-gateway CPU to 90% for 60s causes latency cascade to all
+      downstream services (payment-svc, inventory-svc, checkout-svc) as requests
+      queue at the gateway. Pipeline detects HighLatency on api-gateway within 40s.
+      RCA picks api-gateway as root (upstream of all services showing latency).
+    blast_radius:
+      target: 1 instance of api-gateway (container ronki-api-gateway)
+      duration_seconds: 60
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 50% for 20s
+      method: docker exec ronki-api-gateway pkill stress-ng
+    measurement:
+      metrics: [probe_pass_rate, api_gateway_cpu_pct, api_gateway_p99, all_services_p99, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: api-gateway
+      expected_fault_class: cpu_saturation
+
+  - id: 5
+    name: payment_db_memory_fill
+    fault_type: memory
+    target: payment-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, payment-svc memory < 70%.
+      Filling payment-svc container memory to 95% for 60s causes connection pool
+      exhaustion and OOM pressure, leading to slow/failed payment transactions.
+      Pipeline fires HighErrorRate or HighLatency on payment-svc within 50s.
+      RCA picks payment-svc (proxy for payment-db dependency) as root cause.
+    blast_radius:
+      target: 1 instance of payment-svc (container ronki-payment-svc)
+      duration_seconds: 60
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 40% for 20s
+      method: docker exec ronki-payment-svc pkill stress-ng
+    measurement:
+      metrics: [probe_pass_rate, payment_memory_pct, payment_error_rate, payment_conn_pool, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: payment-svc
+      expected_fault_class: memory
+
+  - id: 6
+    name: auth_svc_clock_skew
+    fault_type: time_skew
+    target: auth-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, auth-svc JWT validation success rate > 98%.
+      Injecting +60s clock skew on auth-svc for 60s causes JWT token validation
+      failures (tokens appear expired from auth-svc perspective) or cert validation
+      errors. Pipeline detects HighErrorRate on auth-svc within 45s.
+      RCA picks auth-svc as root (not api-gateway or frontend which are downstream victims).
+    blast_radius:
+      target: 1 instance of auth-svc (container ronki-auth-svc)
+      duration_seconds: 60
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 50% for 20s
+      method: docker exec ronki-auth-svc date -s now
+    measurement:
+      metrics: [probe_pass_rate, auth_error_rate, jwt_failure_count, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: auth-svc
+      expected_fault_class: time_skew
+
+  - id: 7
+    name: log_collector_disk_fill
+    fault_type: disk_fill
+    target: log-collector
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, log-collector disk usage < 60%.
+      Filling log-collector disk to 95% for 60s causes log ingestion lag and
+      potential write failures. This tests meta-monitoring: pipeline should detect
+      the log-collector itself as degraded (InstanceDown or custom log-lag alert).
+      RCA picks log-collector. This is a "monitoring stack health" test case.
+    blast_radius:
+      target: 1 instance of log-collector (container ronki-log-collector)
+      duration_seconds: 60
+      traffic_percent: 0
+    rollback:
+      automatic: true
+      trigger_when: log_collector_disk_pct > 90%
+      method: docker exec ronki-log-collector rm -f /tmp/diskfill_chaos
+    measurement:
+      metrics: [probe_pass_rate, log_collector_disk_pct, log_ingestion_lag, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: log-collector
+      expected_fault_class: disk_fill
+
+  - id: 8
+    name: frontend_gateway_partition
+    fault_type: network_partition
+    target: frontend
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%.
+      Dropping all traffic between frontend and api-gateway for 30s creates a
+      full partition at the edge. All downstream services appear unreachable from
+      user perspective. Pipeline detects InstanceDown or HighErrorRate on frontend
+      within 35s. RCA picks frontend or api-gateway (edge of the topology graph)
+      as root, NOT payment-svc or inventory-svc which are only downstream victims.
+    blast_radius:
+      target: 1 instance of frontend (container ronki-frontend), api-gateway network path
+      duration_seconds: 30
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 20% for 15s
+      method: docker exec ronki-frontend iptables -F INPUT
+    measurement:
+      metrics: [probe_pass_rate, frontend_error_rate, api_gateway_error_rate, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: frontend
+      expected_fault_class: network_partition
+
+  - id: 9
+    name: dns_resolver_slow
+    fault_type: dns_latency
+    target: dns-resolver
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, DNS resolution < 100ms.
+      Injecting +2000ms DNS lookup delay on dns-resolver for 60s causes
+      intermittent connection timeouts across all services that perform DNS lookups
+      (service discovery, external calls). Pipeline detects intermittent errors
+      or latency spikes. RCA depends on topology: dns-resolver should be identified
+      as root if correlator uses topology-aware analysis.
+    blast_radius:
+      target: 1 instance of dns-resolver (container ronki-dns-resolver)
+      duration_seconds: 60
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 60% for 30s
+      method: docker restart ronki-dns-resolver
+    measurement:
+      metrics: [probe_pass_rate, dns_resolution_ms, service_error_rates, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: dns-resolver
+      expected_fault_class: dns_latency
+
+  - id: 10
+    name: checkout_retry_storm
+    fault_type: http_error
+    target: checkout-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%.
+      Injecting 20% HTTP 500 on checkout-svc responses for 90s triggers client-side
+      retries which amplify load on upstream payment-svc and inventory-svc by 3-5x.
+      Pipeline MUST NOT pick checkout-svc as root (it is the symptom carrier,
+      injecting errors, but the retry storm reveals queue depth issues upstream).
+      RCA should pick payment-svc OR inventory-svc based on which shows higher
+      queue depth / error rate from retry amplification. This is a negative test
+      validating that correlator is topology-aware and not fooled by loud symptoms.
+    blast_radius:
+      target: 100% of checkout-svc requests via Toxiproxy
+      duration_seconds: 90
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 30% for 30s
+      method: toxiproxy-cli toxic remove --toxicName checkout_http_error checkout-svc
+    measurement:
+      metrics: [probe_pass_rate, retry_count, checkout_error_rate, payment_queue_depth, inventory_queue_depth, rca_root_service]
+      capture_window_seconds: 600
+    ground_truth:
+      expected_root_service: NOT checkout-svc
+      expected_fault_class: cascade_retry

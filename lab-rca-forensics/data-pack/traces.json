@@ -1,0 +1,1588 @@
+[
+  {
+    "trace_id": "9179691103217715",
+    "started_at": "2026-03-01T12:37:18Z",
+    "duration_ms": 208,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "d5e60724e5c765bd",
+    "started_at": "2026-03-01T19:34:39Z",
+    "duration_ms": 188,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "ee989ee666c72eb5",
+    "started_at": "2026-03-02T17:48:53Z",
+    "duration_ms": 220,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "d9bd3ff9fd088677",
+    "started_at": "2026-03-04T10:20:41Z",
+    "duration_ms": 191,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "6a870411de257668",
+    "started_at": "2026-03-05T14:32:00Z",
+    "duration_ms": 5690,
+    "status": "error",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 8200,
+        "status": "error"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 8000,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 7800,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "fx_client.convert",
+        "duration_ms": 6500,
+        "status": "error",
+        "error": "fx_503_after_3_retries",
+        "attempts": [
+          {
+            "attempt": 1,
+            "duration_ms": 1800,
+            "status": 503
+          },
+          {
+            "attempt": 2,
+            "duration_ms": 2200,
+            "status": 503
+          },
+          {
+            "attempt": 3,
+            "duration_ms": 2500,
+            "status": 503
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trace_id": "9618799b134f1f40",
+    "started_at": "2026-03-05T14:33:40Z",
+    "duration_ms": 5541,
+    "status": "error",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 8200,
+        "status": "error"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 8000,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 7800,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "fx_client.convert",
+        "duration_ms": 6500,
+        "status": "error",
+        "error": "fx_503_after_3_retries",
+        "attempts": [
+          {
+            "attempt": 1,
+            "duration_ms": 1800,
+            "status": 503
+          },
+          {
+            "attempt": 2,
+            "duration_ms": 2200,
+            "status": 503
+          },
+          {
+            "attempt": 3,
+            "duration_ms": 2500,
+            "status": 503
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trace_id": "1502a3e2fd7abc17",
+    "started_at": "2026-03-05T14:35:20Z",
+    "duration_ms": 8185,
+    "status": "error",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 8200,
+        "status": "error"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 8000,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 7800,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "fx_client.convert",
+        "duration_ms": 6500,
+        "status": "error",
+        "error": "fx_503_after_3_retries",
+        "attempts": [
+          {
+            "attempt": 1,
+            "duration_ms": 1800,
+            "status": 503
+          },
+          {
+            "attempt": 2,
+            "duration_ms": 2200,
+            "status": 503
+          },
+          {
+            "attempt": 3,
+            "duration_ms": 2500,
+            "status": 503
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trace_id": "a8c2a22d44840991",
+    "started_at": "2026-03-05T14:37:00Z",
+    "duration_ms": 8194,
+    "status": "error",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 8200,
+        "status": "error"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 8000,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 7800,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "fx_client.convert",
+        "duration_ms": 6500,
+        "status": "error",
+        "error": "fx_503_after_3_retries",
+        "attempts": [
+          {
+            "attempt": 1,
+            "duration_ms": 1800,
+            "status": 503
+          },
+          {
+            "attempt": 2,
+            "duration_ms": 2200,
+            "status": 503
+          },
+          {
+            "attempt": 3,
+            "duration_ms": 2500,
+            "status": 503
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trace_id": "c66e83d126805d8a",
+    "started_at": "2026-03-05T14:38:40Z",
+    "duration_ms": 7231,
+    "status": "error",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 8200,
+        "status": "error"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 8000,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 7800,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "fx_client.convert",
+        "duration_ms": 6500,
+        "status": "error",
+        "error": "fx_503_after_3_retries",
+        "attempts": [
+          {
+            "attempt": 1,
+            "duration_ms": 1800,
+            "status": 503
+          },
+          {
+            "attempt": 2,
+            "duration_ms": 2200,
+            "status": 503
+          },
+          {
+            "attempt": 3,
+            "duration_ms": 2500,
+            "status": 503
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trace_id": "b61c34170cc7e500",
+    "started_at": "2026-03-05T14:40:20Z",
+    "duration_ms": 7304,
+    "status": "error",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 8200,
+        "status": "error"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 8000,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 7800,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "fx_client.convert",
+        "duration_ms": 6500,
+        "status": "error",
+        "error": "fx_503_after_3_retries",
+        "attempts": [
+          {
+            "attempt": 1,
+            "duration_ms": 1800,
+            "status": 503
+          },
+          {
+            "attempt": 2,
+            "duration_ms": 2200,
+            "status": 503
+          },
+          {
+            "attempt": 3,
+            "duration_ms": 2500,
+            "status": 503
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trace_id": "4c14e51e5cdab2a2",
+    "started_at": "2026-03-05T14:42:00Z",
+    "duration_ms": 7962,
+    "status": "error",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 8200,
+        "status": "error"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 8000,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 7800,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "fx_client.convert",
+        "duration_ms": 6500,
+        "status": "error",
+        "error": "fx_503_after_3_retries",
+        "attempts": [
+          {
+            "attempt": 1,
+            "duration_ms": 1800,
+            "status": 503
+          },
+          {
+            "attempt": 2,
+            "duration_ms": 2200,
+            "status": 503
+          },
+          {
+            "attempt": 3,
+            "duration_ms": 2500,
+            "status": 503
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trace_id": "c873ad5563f242bd",
+    "started_at": "2026-03-05T14:43:40Z",
+    "duration_ms": 8167,
+    "status": "error",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 8200,
+        "status": "error"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 8000,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 7800,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "fx_client.convert",
+        "duration_ms": 6500,
+        "status": "error",
+        "error": "fx_503_after_3_retries",
+        "attempts": [
+          {
+            "attempt": 1,
+            "duration_ms": 1800,
+            "status": 503
+          },
+          {
+            "attempt": 2,
+            "duration_ms": 2200,
+            "status": 503
+          },
+          {
+            "attempt": 3,
+            "duration_ms": 2500,
+            "status": 503
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trace_id": "a310c8b2c52c69fa",
+    "started_at": "2026-03-07T08:58:14Z",
+    "duration_ms": 184,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "668af8cae9ce8d49",
+    "started_at": "2026-03-07T16:19:30Z",
+    "duration_ms": 234,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "1492caa92bb28116",
+    "started_at": "2026-03-11T03:00:00Z",
+    "duration_ms": 2022,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 3200,
+        "status": "error"
+      },
+      {
+        "service": "inventory-svc",
+        "op": "stock_lookup",
+        "duration_ms": 2800,
+        "status": "error",
+        "error": "gc_pause"
+      }
+    ]
+  },
+  {
+    "trace_id": "db284d4bd710c38a",
+    "started_at": "2026-03-11T03:20:00Z",
+    "duration_ms": 3172,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 3200,
+        "status": "error"
+      },
+      {
+        "service": "inventory-svc",
+        "op": "stock_lookup",
+        "duration_ms": 2800,
+        "status": "error",
+        "error": "gc_pause"
+      }
+    ]
+  },
+  {
+    "trace_id": "0458ff71690a97b6",
+    "started_at": "2026-03-11T03:40:00Z",
+    "duration_ms": 2361,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 3200,
+        "status": "error"
+      },
+      {
+        "service": "inventory-svc",
+        "op": "stock_lookup",
+        "duration_ms": 2800,
+        "status": "error",
+        "error": "gc_pause"
+      }
+    ]
+  },
+  {
+    "trace_id": "491dc7393555f058",
+    "started_at": "2026-03-11T04:00:00Z",
+    "duration_ms": 2525,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 3200,
+        "status": "error"
+      },
+      {
+        "service": "inventory-svc",
+        "op": "stock_lookup",
+        "duration_ms": 2800,
+        "status": "error",
+        "error": "gc_pause"
+      }
+    ]
+  },
+  {
+    "trace_id": "e8cfebcf81d0324a",
+    "started_at": "2026-03-11T04:20:00Z",
+    "duration_ms": 2302,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 3200,
+        "status": "error"
+      },
+      {
+        "service": "inventory-svc",
+        "op": "stock_lookup",
+        "duration_ms": 2800,
+        "status": "error",
+        "error": "gc_pause"
+      }
+    ]
+  },
+  {
+    "trace_id": "990bc67e90bbcf18",
+    "started_at": "2026-03-11T04:40:00Z",
+    "duration_ms": 3371,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 3200,
+        "status": "error"
+      },
+      {
+        "service": "inventory-svc",
+        "op": "stock_lookup",
+        "duration_ms": 2800,
+        "status": "error",
+        "error": "gc_pause"
+      }
+    ]
+  },
+  {
+    "trace_id": "1f88aa3e55120aee",
+    "started_at": "2026-03-12T16:17:49Z",
+    "duration_ms": 231,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "74d99424f2a2358b",
+    "started_at": "2026-03-13T19:38:30Z",
+    "duration_ms": 231,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "6922b3a419a079aa",
+    "started_at": "2026-03-15T09:31:06Z",
+    "duration_ms": 194,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "7ca38cd3be88db8b",
+    "started_at": "2026-03-15T10:23:05Z",
+    "duration_ms": 204,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "5d9116e74486e312",
+    "started_at": "2026-03-16T16:31:22Z",
+    "duration_ms": 235,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "2a5fccb918c04e1b",
+    "started_at": "2026-03-16T17:41:42Z",
+    "duration_ms": 182,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "d3a31b29cd177ce1",
+    "started_at": "2026-03-17T10:53:13Z",
+    "duration_ms": 209,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "97ec012decd77be1",
+    "started_at": "2026-03-17T11:20:00Z",
+    "duration_ms": 4213,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 4100,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 3900,
+        "status": "error",
+        "error": "downstream_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "loyalty_client.recommend",
+        "duration_ms": 3700,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout",
+        "db_query": "SELECT * FROM transactions WHERE user_id = ? ORDER BY ts DESC",
+        "rows_examined": 180000,
+        "uses_index": false
+      }
+    ]
+  },
+  {
+    "trace_id": "1cbb16a5a50d17d5",
+    "started_at": "2026-03-17T11:27:00Z",
+    "duration_ms": 4405,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 4100,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 3900,
+        "status": "error",
+        "error": "downstream_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "loyalty_client.recommend",
+        "duration_ms": 3700,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout",
+        "db_query": "SELECT * FROM transactions WHERE user_id = ? ORDER BY ts DESC",
+        "rows_examined": 180000,
+        "uses_index": false
+      }
+    ]
+  },
+  {
+    "trace_id": "95a2790dbbbe6b58",
+    "started_at": "2026-03-17T11:34:00Z",
+    "duration_ms": 3958,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 4100,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 3900,
+        "status": "error",
+        "error": "downstream_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "loyalty_client.recommend",
+        "duration_ms": 3700,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout",
+        "db_query": "SELECT * FROM transactions WHERE user_id = ? ORDER BY ts DESC",
+        "rows_examined": 180000,
+        "uses_index": false
+      }
+    ]
+  },
+  {
+    "trace_id": "00e0330f5fa22872",
+    "started_at": "2026-03-17T11:41:00Z",
+    "duration_ms": 3650,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 4100,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 3900,
+        "status": "error",
+        "error": "downstream_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "loyalty_client.recommend",
+        "duration_ms": 3700,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout",
+        "db_query": "SELECT * FROM transactions WHERE user_id = ? ORDER BY ts DESC",
+        "rows_examined": 180000,
+        "uses_index": false
+      }
+    ]
+  },
+  {
+    "trace_id": "dee7da1c5b52852e",
+    "started_at": "2026-03-17T11:48:00Z",
+    "duration_ms": 4099,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 4100,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 3900,
+        "status": "error",
+        "error": "downstream_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "loyalty_client.recommend",
+        "duration_ms": 3700,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout",
+        "db_query": "SELECT * FROM transactions WHERE user_id = ? ORDER BY ts DESC",
+        "rows_examined": 180000,
+        "uses_index": false
+      }
+    ]
+  },
+  {
+    "trace_id": "93e08247f9509e76",
+    "started_at": "2026-03-17T11:55:00Z",
+    "duration_ms": 3820,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 4100,
+        "status": "error"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 3900,
+        "status": "error",
+        "error": "downstream_timeout"
+      },
+      {
+        "service": "payment-svc",
+        "op": "loyalty_client.recommend",
+        "duration_ms": 3700,
+        "status": "error",
+        "error": "conn_pool_acquire_timeout",
+        "db_query": "SELECT * FROM transactions WHERE user_id = ? ORDER BY ts DESC",
+        "rows_examined": 180000,
+        "uses_index": false
+      }
+    ]
+  },
+  {
+    "trace_id": "a279d409072df9c9",
+    "started_at": "2026-03-20T19:25:46Z",
+    "duration_ms": 220,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "a2689dc6228898d3",
+    "started_at": "2026-03-21T12:06:22Z",
+    "duration_ms": 200,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "b4dd34265bcc3021",
+    "started_at": "2026-03-22T09:02:00Z",
+    "duration_ms": 126,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 120,
+        "status": "error",
+        "az": "c"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 80,
+        "status": "error",
+        "az": "c",
+        "error": "connection_refused",
+        "remote_host": "pp.vendor.example",
+        "resolved_ip": "203.0.113.10"
+      }
+    ]
+  },
+  {
+    "trace_id": "a3a3e0fe74990a18",
+    "started_at": "2026-03-22T09:07:00Z",
+    "duration_ms": 212,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 200,
+        "status": "ok",
+        "az": "a"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 150,
+        "status": "ok",
+        "az": "a",
+        "remote_host": "pp.vendor.example",
+        "resolved_ip": "198.51.100.20"
+      }
+    ]
+  },
+  {
+    "trace_id": "48f69e70f818595f",
+    "started_at": "2026-03-22T09:12:00Z",
+    "duration_ms": 114,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 120,
+        "status": "error",
+        "az": "c"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 80,
+        "status": "error",
+        "az": "c",
+        "error": "connection_refused",
+        "remote_host": "pp.vendor.example",
+        "resolved_ip": "203.0.113.10"
+      }
+    ]
+  },
+  {
+    "trace_id": "b4f591c7cadcc61b",
+    "started_at": "2026-03-22T09:17:00Z",
+    "duration_ms": 210,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 200,
+        "status": "ok",
+        "az": "a"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 150,
+        "status": "ok",
+        "az": "a",
+        "remote_host": "pp.vendor.example",
+        "resolved_ip": "198.51.100.20"
+      }
+    ]
+  },
+  {
+    "trace_id": "dc55907f3c0ecaa7",
+    "started_at": "2026-03-22T09:22:00Z",
+    "duration_ms": 158,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 120,
+        "status": "error",
+        "az": "c"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 80,
+        "status": "error",
+        "az": "c",
+        "error": "connection_refused",
+        "remote_host": "pp.vendor.example",
+        "resolved_ip": "203.0.113.10"
+      }
+    ]
+  },
+  {
+    "trace_id": "405888ca537a6b7e",
+    "started_at": "2026-03-22T09:27:00Z",
+    "duration_ms": 208,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 200,
+        "status": "ok",
+        "az": "b"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 150,
+        "status": "ok",
+        "az": "b",
+        "remote_host": "pp.vendor.example",
+        "resolved_ip": "198.51.100.20"
+      }
+    ]
+  },
+  {
+    "trace_id": "8d09fa79857221ee",
+    "started_at": "2026-03-22T09:32:00Z",
+    "duration_ms": 104,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 120,
+        "status": "error",
+        "az": "c"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 80,
+        "status": "error",
+        "az": "c",
+        "error": "connection_refused",
+        "remote_host": "pp.vendor.example",
+        "resolved_ip": "203.0.113.10"
+      }
+    ]
+  },
+  {
+    "trace_id": "ff1e6c5902540e89",
+    "started_at": "2026-03-22T09:37:00Z",
+    "duration_ms": 215,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 200,
+        "status": "ok",
+        "az": "b"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 150,
+        "status": "ok",
+        "az": "b",
+        "remote_host": "pp.vendor.example",
+        "resolved_ip": "198.51.100.20"
+      }
+    ]
+  },
+  {
+    "trace_id": "60e17bc42a36d353",
+    "started_at": "2026-03-24T13:46:42Z",
+    "duration_ms": 183,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "a8da265397621c23",
+    "started_at": "2026-03-25T16:08:44Z",
+    "duration_ms": 194,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "d022faeec5e7466d",
+    "started_at": "2026-03-25T16:48:17Z",
+    "duration_ms": 186,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "0cc51aea68464055",
+    "started_at": "2026-03-26T20:35:02Z",
+    "duration_ms": 220,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "trace_id": "6fc9a5bbc22ea4f2",
+    "started_at": "2026-03-27T06:00:30Z",
+    "duration_ms": 697,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 500,
+        "status": "error",
+        "error": "mtls_failure"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "mtls_client.handshake",
+        "duration_ms": 200,
+        "status": "error",
+        "error": "certificate_not_yet_valid",
+        "not_before": "2026-03-27T06:00:15Z",
+        "observed_at_on_validator": "2026-03-27T05:59:48Z",
+        "validator_clock_skew_seconds": -27
+      }
+    ]
+  },
+  {
+    "trace_id": "bcb41ec83a4a6c59",
+    "started_at": "2026-03-27T06:02:00Z",
+    "duration_ms": 531,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 500,
+        "status": "error",
+        "error": "mtls_failure"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "mtls_client.handshake",
+        "duration_ms": 200,
+        "status": "error",
+        "error": "certificate_not_yet_valid",
+        "not_before": "2026-03-27T06:00:15Z",
+        "observed_at_on_validator": "2026-03-27T05:59:48Z",
+        "validator_clock_skew_seconds": -27
+      }
+    ]
+  },
+  {
+    "trace_id": "477e75268d154ee9",
+    "started_at": "2026-03-27T06:03:30Z",
+    "duration_ms": 429,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 500,
+        "status": "error",
+        "error": "mtls_failure"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "mtls_client.handshake",
+        "duration_ms": 200,
+        "status": "error",
+        "error": "certificate_not_yet_valid",
+        "not_before": "2026-03-27T06:00:15Z",
+        "observed_at_on_validator": "2026-03-27T05:59:48Z",
+        "validator_clock_skew_seconds": -27
+      }
+    ]
+  },
+  {
+    "trace_id": "61222ca228f1ba68",
+    "started_at": "2026-03-27T06:05:00Z",
+    "duration_ms": 471,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 500,
+        "status": "error",
+        "error": "mtls_failure"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "mtls_client.handshake",
+        "duration_ms": 200,
+        "status": "error",
+        "error": "certificate_not_yet_valid",
+        "not_before": "2026-03-27T06:00:15Z",
+        "observed_at_on_validator": "2026-03-27T05:59:48Z",
+        "validator_clock_skew_seconds": -27
+      }
+    ]
+  },
+  {
+    "trace_id": "88b2f53d32680b48",
+    "started_at": "2026-03-27T06:06:30Z",
+    "duration_ms": 521,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 500,
+        "status": "error",
+        "error": "mtls_failure"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "mtls_client.handshake",
+        "duration_ms": 200,
+        "status": "error",
+        "error": "certificate_not_yet_valid",
+        "not_before": "2026-03-27T06:00:15Z",
+        "observed_at_on_validator": "2026-03-27T05:59:48Z",
+        "validator_clock_skew_seconds": -27
+      }
+    ]
+  },
+  {
+    "trace_id": "e8996494b3b3883a",
+    "started_at": "2026-03-27T06:08:00Z",
+    "duration_ms": 621,
+    "status": "error",
+    "spans": [
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 500,
+        "status": "error",
+        "error": "mtls_failure"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "mtls_client.handshake",
+        "duration_ms": 200,
+        "status": "error",
+        "error": "certificate_not_yet_valid",
+        "not_before": "2026-03-27T06:00:15Z",
+        "observed_at_on_validator": "2026-03-27T05:59:48Z",
+        "validator_clock_skew_seconds": -27
+      }
+    ]
+  },
+  {
+    "trace_id": "fbace02e18f4752c",
+    "started_at": "2026-03-29T11:34:04Z",
+    "duration_ms": 210,
+    "status": "ok",
+    "spans": [
+      {
+        "service": "frontend",
+        "op": "POST /checkout",
+        "duration_ms": 220,
+        "status": "ok"
+      },
+      {
+        "service": "checkout-svc",
+        "op": "process",
+        "duration_ms": 180,
+        "status": "ok"
+      },
+      {
+        "service": "payment-svc",
+        "op": "charge",
+        "duration_ms": 120,
+        "status": "ok"
+      }
+    ]
+  }
+]

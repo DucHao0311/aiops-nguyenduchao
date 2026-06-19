@@ -1,0 +1,64 @@
+# 10 chaos experiments — fill #2-9, keep #1 + #10 as reference
+# Each entry needs ALL 5 fields per §5: name, hypothesis, blast_radius, rollback, measurement, ground_truth
+
+experiments:
+
+  - id: 1
+    name: payment_latency
+    fault_type: latency
+    target: payment-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, p99 latency < 500ms.
+      Injecting 500ms ± 100ms delay on payment-svc network egress for 60s,
+      pipeline detector fires latency anomaly within 30s and RCA picks payment-svc.
+      probe pass-rate may drop to 70-80% during inject (acceptable).
+    blast_radius:
+      target: 1 instance of payment-svc
+      duration_seconds: 60
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 50% for 20s
+      method: tc qdisc del dev eth0 root
+    measurement:
+      metrics: [probe_pass_rate, p99_latency, detector_alerts, rca_root_service]
+      capture_window_seconds: 300
+    ground_truth:
+      expected_root_service: payment-svc
+      expected_fault_class: latency
+
+  # TODO: fill entries 2-9 below.
+  # Required catalog (§8.3):
+  #   2  payment-svc       netem loss 30%               → error_rate detect, RCA payment
+  #   3  inventory-svc     pod kill every 60s           → availability, RCA inventory
+  #   4  api-gateway       stress CPU 90%               → cascade latency, all downstream
+  #   5  payment-db        memory fill 95%              → conn pool, RCA payment-db
+  #   6  auth-svc          clock skew +60s              → JWT/cert fail, RCA auth
+  #   7  log-collector     disk fill 95%                → ingestion lag (meta-monitor)
+  #   8  frontend/gateway  full network partition 30s   → all-downstream timeout, RCA edge
+  #   9  dns resolver      slow lookup +2s              → intermittent error, RCA topo-dependent
+
+  - id: 10
+    name: checkout_retry_storm
+    fault_type: http_error
+    target: checkout-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%.
+      Injecting 20% HTTP 500 on checkout-svc responses for 90s, client retries
+      amplify load on upstream payment-svc + inventory-svc. Pipeline must NOT
+      pick checkout-svc as root (it's the symptom carrier, not cause). RCA
+      should pick payment-svc OR inventory-svc (whichever shows queue depth).
+    blast_radius:
+      target: 100% of checkout-svc requests
+      duration_seconds: 90
+      traffic_percent: 100
+    rollback:
+      automatic: true
+      trigger_when: probe_pass_rate < 30% for 30s
+      method: toxiproxy-cli toxic remove
+    measurement:
+      metrics: [probe_pass_rate, retry_count, upstream_queue_depth, rca_root_service]
+      capture_window_seconds: 600
+    ground_truth:
+      expected_root_service: NOT checkout-svc  # negative test
+      expected_fault_class: cascade_retry

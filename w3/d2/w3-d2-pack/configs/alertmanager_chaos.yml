@@ -1,0 +1,27 @@
+global:
+  resolve_timeout: 1m
+
+route:
+  group_by: ["alertname", "service"]
+  group_wait: 5s
+  group_interval: 15s
+  repeat_interval: 1m
+  receiver: "aiops-webhook"
+  routes:
+    - match:
+        severity: critical
+      group_wait: 5s
+      receiver: "aiops-webhook"
+
+receivers:
+  - name: "aiops-webhook"
+    # AIOps pipeline polls /api/v2/alerts directly — this is a no-op receiver
+    webhook_configs: []
+
+inhibit_rules:
+  # InstanceDown suppresses latency + error alerts for the same downed service
+  - source_match:
+      alertname: InstanceDown
+    target_match_re:
+      alertname: "HighLatency|HighErrorRate|PaymentHighLatency"
+    equal: ["service"]

@@ -1,0 +1,78 @@
+{
+  "platform": "ronki-shop",
+  "services": [
+    {
+      "name": "frontend",
+      "deps": [
+        "api-gateway"
+      ]
+    },
+    {
+      "name": "api-gateway",
+      "deps": [
+        "checkout-svc"
+      ]
+    },
+    {
+      "name": "checkout-svc",
+      "deps": [
+        "payment-svc",
+        "inventory-svc",
+        "redis-cache"
+      ]
+    },
+    {
+      "name": "payment-svc",
+      "deps": [
+        "rds-orders",
+        "fx-api",
+        "pp-api"
+      ]
+    },
+    {
+      "name": "inventory-svc",
+      "deps": [
+        "rds-inventory",
+        "warehouse-api"
+      ]
+    },
+    {
+      "name": "redis-cache",
+      "deps": []
+    },
+    {
+      "name": "rds-orders",
+      "deps": []
+    },
+    {
+      "name": "rds-inventory",
+      "deps": []
+    }
+  ],
+  "third_party": [
+    {
+      "name": "fx-api",
+      "endpoint": "https://fx.vendor.example/v1/convert",
+      "owner": "external"
+    },
+    {
+      "name": "pp-api",
+      "endpoint": "https://pp.vendor.example/v2/charge",
+      "owner": "external"
+    },
+    {
+      "name": "warehouse-api",
+      "endpoint": "https://wh.partner.example/api",
+      "owner": "external"
+    }
+  ],
+  "infrastructure": {
+    "availability_zones": [
+      "a",
+      "b",
+      "c"
+    ],
+    "service_mesh": "internal-mesh-v1",
+    "cert_rotation_interval_hours": 24
+  }
+}

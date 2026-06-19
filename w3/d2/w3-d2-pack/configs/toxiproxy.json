@@ -1,0 +1,14 @@
+[
+  {
+    "name": "checkout-svc",
+    "listen": "0.0.0.0:21000",
+    "upstream": "checkout-svc:8080",
+    "enabled": true
+  },
+  {
+    "name": "payment-svc",
+    "listen": "0.0.0.0:21001",
+    "upstream": "payment-svc:8080",
+    "enabled": true
+  }
+]

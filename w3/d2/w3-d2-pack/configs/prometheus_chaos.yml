@@ -1,0 +1,63 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - "/etc/prometheus/alert_rules.yml"
+
+scrape_configs:
+  # Application services
+  - job_name: "frontend"
+    static_configs:
+      - targets: ["frontend:8080"]
+        labels: {service: "frontend", tier: "edge"}
+
+  - job_name: "api-gateway"
+    static_configs:
+      - targets: ["api-gateway:8080"]
+        labels: {service: "api-gateway", tier: "gateway"}
+
+  - job_name: "payment-svc"
+    static_configs:
+      - targets: ["payment-svc:8080"]
+        labels: {service: "payment-svc", tier: "app"}
+
+  - job_name: "inventory-svc"
+    static_configs:
+      - targets: ["inventory-svc:8080"]
+        labels: {service: "inventory-svc", tier: "app"}
+
+  - job_name: "notification-svc"
+    static_configs:
+      - targets: ["notification-svc:8080"]
+        labels: {service: "notification-svc", tier: "app"}
+
+  - job_name: "checkout-svc"
+    static_configs:
+      - targets: ["checkout-svc:8080"]
+        labels: {service: "checkout-svc", tier: "app"}
+
+  - job_name: "auth-svc"
+    static_configs:
+      - targets: ["auth-svc:8080"]
+        labels: {service: "auth-svc", tier: "app"}
+
+  - job_name: "log-collector"
+    static_configs:
+      - targets: ["log-collector:8080"]
+        labels: {service: "log-collector", tier: "infra"}
+
+  - job_name: "dns-resolver"
+    static_configs:
+      - targets: ["dns-resolver:8080"]
+        labels: {service: "dns-resolver", tier: "infra"}
+
+  - job_name: "aiops-pipeline"
+    static_configs:
+      - targets: ["aiops-pipeline:8000"]
+        labels: {service: "aiops-pipeline", tier: "platform"}

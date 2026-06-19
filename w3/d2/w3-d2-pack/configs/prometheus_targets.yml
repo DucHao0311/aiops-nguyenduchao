@@ -1,0 +1,22 @@
+# Example Prometheus scrape config — adapt to your stack.
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: services
+    static_configs:
+      - targets:
+          - api-gateway:8080
+          - payment-svc:8080
+          - inventory-svc:8080
+          - notification-svc:8080
+          - checkout-svc:8080
+          - auth-svc:8080
+        labels: {tier: app}
+  - job_name: infra
+    static_configs:
+      - targets:
+          - payment-db:9187
+          - inventory-db:9187
+          - cache-svc:9121
+          - log-collector:9100
+        labels: {tier: infra}

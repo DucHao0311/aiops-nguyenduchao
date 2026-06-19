@@ -1,0 +1,243 @@
+version: "3.9"
+
+# W3-D2 Chaos Engineering Lab — 10-service stack
+# Topology: frontend → api-gateway → payment-svc / inventory-svc / notification-svc / checkout-svc
+#           + auth-svc, log-collector, dns-resolver, cache-svc
+#           + prometheus, grafana, alertmanager
+#           + aiops-pipeline (FastAPI: /alerts /correlate /rca)
+#           + toxiproxy (network fault proxy)
+
+networks:
+  chaos-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+x-svc-common: &svc-common
+  image: python:3.12-slim
+  working_dir: /app
+  networks: [chaos-net]
+  restart: unless-stopped
+  cap_add:
+    - NET_ADMIN     # for tc netem inside container
+    - SYS_TIME      # for clock skew experiments
+  volumes:
+    - ./services/service.py:/app/service.py:ro
+
+x-svc-cmd: &svc-cmd
+  command: >
+    sh -c "pip install --quiet fastapi uvicorn prometheus-client &&
+           uvicorn service:app --host 0.0.0.0 --port 8080"
+
+services:
+
+  # ── Application services ─────────────────────────────────────────────────
+
+  frontend:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-frontend
+    hostname: frontend
+    environment:
+      SERVICE_NAME: frontend
+      BASE_LATENCY_MS: "50"
+      JITTER_MS: "10"
+      FAIL_RATE: "0.01"
+      UPSTREAM_URL: "http://api-gateway:8080"
+    ports: ["8080:8080"]
+
+  api-gateway:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-api-gateway
+    hostname: api-gateway
+    environment:
+      SERVICE_NAME: api-gateway
+      BASE_LATENCY_MS: "80"
+      JITTER_MS: "15"
+      FAIL_RATE: "0.01"
+      UPSTREAM_URL: "http://checkout-svc:8080"
+    ports: ["8081:8080"]
+
+  payment-svc:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-payment-svc
+    hostname: payment-svc
+    environment:
+      SERVICE_NAME: payment-svc
+      BASE_LATENCY_MS: "120"
+      JITTER_MS: "20"
+      FAIL_RATE: "0.02"
+    ports: ["8082:8080"]
+
+  inventory-svc:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-inventory-svc
+    hostname: inventory-svc
+    environment:
+      SERVICE_NAME: inventory-svc
+      BASE_LATENCY_MS: "40"
+      JITTER_MS: "8"
+      FAIL_RATE: "0.01"
+    ports: ["8083:8080"]
+
+  notification-svc:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-notification-svc
+    hostname: notification-svc
+    environment:
+      SERVICE_NAME: notification-svc
+      BASE_LATENCY_MS: "60"
+      JITTER_MS: "12"
+      FAIL_RATE: "0.005"
+    ports: ["8085:8080"]
+
+  checkout-svc:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-checkout-svc
+    hostname: checkout-svc
+    environment:
+      SERVICE_NAME: checkout-svc
+      BASE_LATENCY_MS: "150"
+      JITTER_MS: "25"
+      FAIL_RATE: "0.015"
+      UPSTREAM_PAYMENT: "http://payment-svc:8080"
+      UPSTREAM_INVENTORY: "http://inventory-svc:8080"
+    ports: ["8084:8080"]
+
+  auth-svc:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-auth-svc
+    hostname: auth-svc
+    environment:
+      SERVICE_NAME: auth-svc
+      BASE_LATENCY_MS: "30"
+      JITTER_MS: "5"
+      FAIL_RATE: "0.005"
+    ports: ["8086:8080"]
+
+  log-collector:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-log-collector
+    hostname: log-collector
+    environment:
+      SERVICE_NAME: log-collector
+      BASE_LATENCY_MS: "20"
+      JITTER_MS: "5"
+      FAIL_RATE: "0.001"
+    ports: ["8087:8080"]
+    volumes:
+      - ./services/service.py:/app/service.py:ro
+      - log_data:/var/log/chaos
+
+  dns-resolver:
+    <<: [*svc-common, *svc-cmd]
+    container_name: ronki-dns-resolver
+    hostname: dns-resolver
+    environment:
+      SERVICE_NAME: dns-resolver
+      BASE_LATENCY_MS: "10"
+      JITTER_MS: "3"
+      FAIL_RATE: "0.002"
+    ports: ["8088:8080"]
+
+  cache-svc:
+    image: redis:7-alpine
+    container_name: ronki-cache-svc
+    hostname: cache-svc
+    networks: [chaos-net]
+    restart: unless-stopped
+    cap_add: [NET_ADMIN]
+    ports: ["6379:6379"]
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # ── Observability stack ──────────────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: ronki-prometheus
+    hostname: prometheus
+    networks: [chaos-net]
+    restart: unless-stopped
+    volumes:
+      - ./configs/prometheus_chaos.yml:/etc/prometheus/prometheus.yml:ro
+      - ./configs/alert_rules_chaos.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=2h"
+      - "--web.enable-lifecycle"
+    ports: ["9090:9090"]
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: ronki-alertmanager
+    hostname: alertmanager
+    networks: [chaos-net]
+    restart: unless-stopped
+    volumes:
+      - ./configs/alertmanager_chaos.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    ports: ["9093:9093"]
+
+  grafana:
+    image: grafana/grafana-oss:11.2.0
+    container_name: ronki-grafana
+    hostname: grafana
+    networks: [chaos-net]
+    restart: unless-stopped
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports: ["3000:3000"]
+    depends_on: [prometheus, alertmanager]
+
+  # ── Toxiproxy — network fault proxy ─────────────────────────────────────
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    container_name: ronki-toxiproxy
+    hostname: toxiproxy
+    networks: [chaos-net]
+    restart: unless-stopped
+    ports:
+      - "8474:8474"    # Toxiproxy API
+      - "8474:8474/udp"
+      - "21000:21000"  # checkout-svc proxy
+      - "21001:21001"  # payment-svc proxy
+    volumes:
+      - ./configs/toxiproxy.json:/etc/toxiproxy/config.json:ro
+    command: ["-config", "/etc/toxiproxy/config.json", "-host", "0.0.0.0"]
+
+  # ── AIOps pipeline ───────────────────────────────────────────────────────
+
+  aiops-pipeline:
+    image: python:3.12-slim
+    container_name: ronki-aiops-pipeline
+    hostname: aiops-pipeline
+    working_dir: /app
+    networks: [chaos-net]
+    restart: unless-stopped
+    environment:
+      ALERTMANAGER_URL: "http://alertmanager:9093"
+      PROMETHEUS_URL: "http://prometheus:9090"
+    volumes:
+      - ./pipeline/aiops_pipeline.py:/app/aiops_pipeline.py:ro
+      - ./configs/topology.json:/app/topology.json:ro
+    command: >
+      sh -c "pip install --quiet fastapi uvicorn requests pyyaml &&
+             uvicorn aiops_pipeline:app --host 0.0.0.0 --port 8000 --reload"
+    ports: ["8000:8000"]
+    depends_on: [prometheus, alertmanager]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  prometheus_data:
+  log_data:

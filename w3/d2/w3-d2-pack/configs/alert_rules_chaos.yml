@@ -1,0 +1,97 @@
+groups:
+  - name: chaos_lab.rules
+    interval: 10s
+    rules:
+
+      # ── Latency alerts ────────────────────────────────────────────────────
+      # §7.1 counter: use p99, not mean — avoids noise floor misses
+      - alert: HighLatency
+        expr: >
+          histogram_quantile(0.99,
+            rate(http_request_duration_seconds_bucket[1m])
+          ) > 0.5
+        for: 20s
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p99 latency on {{ $labels.service }}"
+          description: >
+            p99 latency = {{ $value | humanizeDuration }} on {{ $labels.service }}
+            (threshold: 500ms). Possible fault: latency injection or CPU saturation.
+
+      # Tighter threshold for payment service (SLO-sensitive)
+      - alert: PaymentHighLatency
+        expr: >
+          histogram_quantile(0.99,
+            rate(http_request_duration_seconds_bucket{service="payment-svc"}[1m])
+          ) > 0.3
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Payment service p99 latency exceeds 300ms"
+          description: >
+            Payment p99 = {{ $value | humanizeDuration }}.
+            Likely root: payment-svc latency injection or network loss.
+
+      # ── Error rate alerts ─────────────────────────────────────────────────
+      - alert: HighErrorRate
+        expr: >
+          rate(http_errors_total[2m])
+          / (rate(http_requests_total[2m]) + 0.001)
+          > 0.10
+        for: 20s
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: >
+            Error rate = {{ $value | humanizePercentage }} on {{ $labels.service }}
+            (threshold: 10%). Possible fault: network loss, memory fill, or HTTP injection.
+
+      # ── Availability alert ────────────────────────────────────────────────
+      - alert: InstanceDown
+        expr: up == 0
+        for: 20s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance down: {{ $labels.service }}"
+          description: >
+            {{ $labels.service }} (job={{ $labels.job }}) unreachable > 20s.
+            Possible fault: pod kill or network partition.
+
+      # ── CPU saturation ────────────────────────────────────────────────────
+      - alert: HighCPU
+        expr: >
+          rate(container_cpu_usage_seconds_total[1m]) > 0.80
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.service }}"
+          description: >
+            CPU usage > 80% on {{ $labels.service }}.
+            Possible fault: stress-ng CPU saturation injection.
+
+      # ── Cascade / retry storm detection ──────────────────────────────────
+      # Detect when downstream service has high errors but upstream is clean
+      # (symptom of checkout_retry_storm experiment)
+      - alert: RetryStormSuspected
+        expr: >
+          (rate(http_errors_total{service="checkout-svc"}[2m])
+           / (rate(http_requests_total{service="checkout-svc"}[2m]) + 0.001))
+          > 0.15
+          AND
+          (rate(http_errors_total{service="payment-svc"}[2m])
+           / (rate(http_requests_total{service="payment-svc"}[2m]) + 0.001))
+          < 0.05
+        for: 15s
+        labels:
+          severity: warning
+          pattern: retry_storm
+        annotations:
+          summary: "Retry storm pattern: checkout errors but payment healthy"
+          description: >
+            checkout-svc error rate elevated while payment-svc is healthy.
+            Root cause is likely within checkout-svc itself, not upstream.

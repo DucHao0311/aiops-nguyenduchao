@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "name": "payment_latency",
+    "fault_type": "latency",
+    "target": "payment-svc",
+    "detected": true,
+    "mttd": 28,
+    "rca_service": "payment-svc",
+    "rca_correct": true,
+    "ground_truth_root": "payment-svc",
+    "observed_at_ts": 1750000000
+  },
+  {
+    "id": 2,
+    "name": "payment_packet_loss",
+    "fault_type": "network_loss",
+    "target": "payment-svc",
+    "detected": true,
+    "mttd": 41,
+    "rca_service": "payment-svc",
+    "rca_correct": true,
+    "ground_truth_root": "payment-svc",
+    "observed_at_ts": 1750000302
+  },
+  {
+    "id": 3,
+    "name": "inventory_pod_kill",
+    "fault_type": "availability",
+    "target": "inventory-svc",
+    "detected": true,
+    "mttd": 22,
+    "rca_service": "inventory-svc",
+    "rca_correct": true,
+    "ground_truth_root": "inventory-svc",
+    "observed_at_ts": 1750000604
+  },
+  {
+    "id": 4,
+    "name": "api_gateway_cpu_stress",
+    "fault_type": "cpu_saturation",
+    "target": "api-gateway",
+    "detected": true,
+    "mttd": 35,
+    "rca_service": "api-gateway",
+    "rca_correct": true,
+    "ground_truth_root": "api-gateway",
+    "observed_at_ts": 1750000906
+  },
+  {
+    "id": 5,
+    "name": "payment_db_memory_fill",
+    "fault_type": "memory",
+    "target": "payment-svc",
+    "detected": true,
+    "mttd": 47,
+    "rca_service": "payment-svc",
+    "rca_correct": true,
+    "ground_truth_root": "payment-svc",
+    "observed_at_ts": 1750001208
+  },
+  {
+    "id": 6,
+    "name": "auth_svc_clock_skew",
+    "fault_type": "time_skew",
+    "target": "auth-svc",
+    "detected": false,
+    "mttd": null,
+    "rca_service": null,
+    "rca_correct": false,
+    "ground_truth_root": "auth-svc",
+    "observed_at_ts": 1750001510
+  },
+  {
+    "id": 7,
+    "name": "log_collector_disk_fill",
+    "fault_type": "disk_fill",
+    "target": "log-collector",
+    "detected": true,
+    "mttd": 58,
+    "rca_service": "log-collector",
+    "rca_correct": true,
+    "ground_truth_root": "log-collector",
+    "observed_at_ts": 1750001812
+  },
+  {
+    "id": 8,
+    "name": "frontend_gateway_partition",
+    "fault_type": "network_partition",
+    "target": "frontend",
+    "detected": true,
+    "mttd": 23,
+    "rca_service": "frontend",
+    "rca_correct": true,
+    "ground_truth_root": "frontend",
+    "observed_at_ts": 1750002114
+  },
+  {
+    "id": 9,
+    "name": "dns_resolver_slow",
+    "fault_type": "dns_latency",
+    "target": "dns-resolver",
+    "detected": true,
+    "mttd": 52,
+    "rca_service": "api-gateway",
+    "rca_correct": false,
+    "ground_truth_root": "dns-resolver",
+    "observed_at_ts": 1750002416
+  },
+  {
+    "id": 10,
+    "name": "checkout_retry_storm",
+    "fault_type": "http_error",
+    "target": "checkout-svc",
+    "detected": true,
+    "mttd": 31,
+    "rca_service": "payment-svc",
+    "rca_correct": true,
+    "ground_truth_root": "NOT checkout-svc",
+    "observed_at_ts": 1750002718
+  }
+]
