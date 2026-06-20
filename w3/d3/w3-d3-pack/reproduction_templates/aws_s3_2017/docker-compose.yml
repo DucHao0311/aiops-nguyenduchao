@@ -1,0 +1,13 @@
+services:
+  billing:
+    image: alpine
+    command: sh -c "echo billing-svc up; sleep infinity"
+    labels: {subsystem: billing}
+  index:
+    image: alpine
+    command: sh -c "echo index-svc up; sleep infinity"
+    labels: {subsystem: index}
+  placement:
+    image: alpine
+    command: sh -c "echo placement-svc up; sleep infinity"
+    labels: {subsystem: placement}

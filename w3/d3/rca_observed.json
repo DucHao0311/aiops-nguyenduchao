@@ -1,0 +1,46 @@
+{
+  "window_start": 1562071341,
+  "window_end": 1562071941,
+  "window_start_iso": "2019-07-02T13:42:21Z",
+  "window_end_iso": "2019-07-02T13:52:21Z",
+  "services_affected": ["api"],
+  "alert_count_by_service": {
+    "api": 4
+  },
+  "rca_result": {
+    "root_service": "api",
+    "confidence": 0.91,
+    "method": "topology-aware + causal-lag",
+    "root_cause_signal": "CPU saturation at WAF middleware layer",
+    "topology_depth": 0,
+    "first_alert_ts": "2019-07-02T13:42:25Z",
+    "causal_chain": [
+      "WAF rule deployed globally (EVIL_REGEX_ACTIVE=1)",
+      "First adversarial request triggers catastrophic backtracking in EVIL regex",
+      "Regex engine enters exponential-time loop on '(?:(?:\"|(d|.*)+(.*=.*))' vs 'xxxxx=xxxxxx'",
+      "Python re module consumes 100% CPU — async uvicorn event loop blocked",
+      "All subsequent requests queue behind blocked coroutine",
+      "p99 latency 8ms → 8200ms, effective service unavailability"
+    ]
+  },
+  "pipeline_gaps_detected": [
+    {
+      "gap_id": 1,
+      "description": "Pipeline did not distinguish WAF middleware CPU spike from application-level CPU spike. RCA output said 'api service degraded' but could not identify the specific code path (WAF middleware vs business logic) as root.",
+      "impact": "Slower mitigation — operator had to manually check middleware logs to find the regex rule. Pipeline pointed to the right service but not the right layer.",
+      "mitigation": "Add structured WAF middleware metric: 'waf_middleware_duration_seconds' histogram. If WAF processing time > 1s, fire 'WAFRegexSlowPath' alert independently from generic HighLatency."
+    },
+    {
+      "gap_id": 2,
+      "description": "Pipeline alert fired AFTER requests were already blocked. MTTD was 4 seconds from inject, but the first request was already degraded at t+0 (inject time). There was no pre-deploy validation that could catch the malicious regex BEFORE global rollout.",
+      "impact": "In the real Cloudflare incident, 82% traffic was dropped for 27 minutes before rollback. A pre-deploy regex complexity check (ReDoS detector) would prevent the deploy entirely.",
+      "mitigation": "Add a 'canary gate' check in the deployment pipeline: run candidate WAF rules through a ReDoS complexity analyzer (e.g., 'safe-regex' or backtracking complexity estimator) before any production deploy. If complexity > O(n^2), block deploy."
+    }
+  ],
+  "verdict": {
+    "detected_within_30s": true,
+    "mttd_seconds": 4,
+    "correct_root_service": true,
+    "gaps_count": 2
+  }
+}

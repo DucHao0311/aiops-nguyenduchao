@@ -1,0 +1,84 @@
+[
+  {
+    "name": "HighLatency",
+    "service": "api",
+    "fire_ts": 1562071345,
+    "fire_iso": "2019-07-02T13:42:25Z",
+    "severity": "critical",
+    "labels": {
+      "alertname": "HighLatency",
+      "service": "api",
+      "container": "cloudflare_regex_2019_api_1",
+      "failure_mode": "catastrophic_backtracking"
+    },
+    "annotations": {
+      "summary": "API p99 latency exceeded 500ms threshold",
+      "description": "p99 latency = 8200ms (threshold: 500ms). WAF regex middleware consuming 100% CPU on adversarial input. All requests queued behind regex processing."
+    },
+    "mttd_seconds": 4,
+    "resolved_ts": 1562071450,
+    "resolved_iso": "2019-07-02T13:44:10Z",
+    "duration_seconds": 109
+  },
+  {
+    "name": "CPUSaturation",
+    "service": "api",
+    "fire_ts": 1562071348,
+    "fire_iso": "2019-07-02T13:42:28Z",
+    "severity": "critical",
+    "labels": {
+      "alertname": "CPUSaturation",
+      "service": "api",
+      "container": "cloudflare_regex_2019_api_1",
+      "failure_mode": "cpu_pin"
+    },
+    "annotations": {
+      "summary": "Container CPU pinned at 100%",
+      "description": "CPU usage = 100% sustained for > 5 seconds. Regex engine in catastrophic backtracking loop on input pattern 'xxxxx=xxxxxx'. All available CPU consumed by re module."
+    },
+    "mttd_seconds": 7,
+    "resolved_ts": 1562071452,
+    "resolved_iso": "2019-07-02T13:44:12Z",
+    "duration_seconds": 104
+  },
+  {
+    "name": "ContainerCPUThrottle",
+    "service": "api",
+    "fire_ts": 1562071380,
+    "fire_iso": "2019-07-02T13:43:00Z",
+    "severity": "warning",
+    "labels": {
+      "alertname": "ContainerCPUThrottle",
+      "service": "api",
+      "container": "cloudflare_regex_2019_api_1"
+    },
+    "annotations": {
+      "summary": "Container CPU throttle rate > 80%",
+      "description": "Docker cgroup CPU throttle counter indicates sustained CPU starvation. Secondary confirmation of CPU saturation alert."
+    },
+    "mttd_seconds": 39,
+    "resolved_ts": 1562071455,
+    "resolved_iso": "2019-07-02T13:44:15Z",
+    "duration_seconds": 75
+  },
+  {
+    "name": "RequestQueueBuildup",
+    "service": "api",
+    "fire_ts": 1562071425,
+    "fire_iso": "2019-07-02T13:43:45Z",
+    "severity": "warning",
+    "labels": {
+      "alertname": "RequestQueueBuildup",
+      "service": "api",
+      "container": "cloudflare_regex_2019_api_1"
+    },
+    "annotations": {
+      "summary": "HTTP connection queue depth growing",
+      "description": "Uvicorn event loop starved by blocking regex execution in async middleware. New connections queuing, /healthz also degraded because middleware runs on ALL requests."
+    },
+    "mttd_seconds": 84,
+    "resolved_ts": 1562071458,
+    "resolved_iso": "2019-07-02T13:44:18Z",
+    "duration_seconds": 33
+  }
+]

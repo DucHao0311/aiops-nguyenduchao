@@ -1,0 +1,66 @@
+# 5 historic outages — pick 1 to reproduce per §9.2
+outages:
+  - id: 1
+    name: AWS S3 us-east-1
+    date: 2017-02-28
+    duration_hours: 4
+    failure_mode: operator_typo
+    reproduce_dir: reproduction_templates/aws_s3_2017
+    difficulty: easy
+    postmortem_url: https://aws.amazon.com/message/41926/
+    summary: |
+      Operator running a billing-subsystem maintenance command mistyped the
+      command and removed many more servers than intended, including ones
+      from the S3 index and placement subsystems. Full restart required.
+
+  - id: 2
+    name: GitHub MySQL split-brain
+    date: 2018-10-21
+    duration_hours: 24.18
+    failure_mode: split_brain
+    reproduce_dir: reproduction_templates/github_mysql_2018
+    difficulty: hard
+    postmortem_url: https://github.blog/2018-10-30-oct21-post-incident-analysis
+    summary: |
+      43-second network partition triggered MySQL Orchestrator to promote a
+      replica in another region. When connectivity returned, both sides
+      believed they were primary. Data reconciliation took 24h.
+
+  - id: 3
+    name: Cloudflare WAF regex
+    date: 2019-07-02
+    duration_minutes: 27
+    failure_mode: catastrophic_backtracking
+    reproduce_dir: reproduction_templates/cloudflare_regex_2019
+    difficulty: medium
+    postmortem_url: https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019
+    summary: |
+      A new WAF rule introduced a regex with catastrophic backtracking. CPU
+      pegged on every edge node globally within seconds. Global deploy meant
+      no canary buffer.
+
+  - id: 4
+    name: Roblox Consul + BoltDB
+    date: 2021-10-28
+    duration_hours: 73
+    failure_mode: monitoring_loop
+    reproduce_dir: reproduction_templates/roblox_consul_2021
+    difficulty: hard
+    postmortem_url: https://about.roblox.com/newsroom/2022/01/roblox-return-to-service-10-28-10-31-2021
+    summary: |
+      Streaming write contention in Consul, amplified by a slow BoltDB
+      freelist algorithm, was hidden by monitoring that itself depended on
+      the failing Consul cluster. Cascading 73-hour outage.
+
+  - id: 5
+    name: Slack post-holiday provisioning overload
+    date: 2022-01-04
+    duration_hours: 6
+    failure_mode: capacity_provisioning_overload
+    reproduce_dir: reproduction_templates/slack_2022
+    difficulty: medium
+    postmortem_url: https://slack.engineering/slacks-incident-on-2-22-22/
+    summary: |
+      Holiday traffic recovery caused all clients to reconnect at once. The
+      provisioning subsystem (responsible for routing) could not keep up;
+      cascading retries amplified load.

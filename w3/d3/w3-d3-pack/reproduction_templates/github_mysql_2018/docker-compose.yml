@@ -1,0 +1,34 @@
+services:
+  mysql-primary:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    networks: [east]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-pexample"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  mysql-replica:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    networks: [west]
+  orchestrator:
+    image: alpine
+    command: |
+      sh -c '
+      apk add --no-cache mysql-client > /dev/null;
+      while true; do
+        if ! mysqladmin -h mysql-primary -pexample ping 2>/dev/null > /dev/null; then
+          echo "[$$(date -u +%H:%M:%S)] primary unreachable - would promote replica";
+        else
+          echo "[$$(date -u +%H:%M:%S)] primary OK";
+        fi;
+        sleep 5;
+      done'
+    networks: [east, west]
+
+networks:
+  east: {}
+  west: {}

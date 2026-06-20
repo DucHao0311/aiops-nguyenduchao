@@ -1,0 +1,92 @@
+[
+  {
+    "ts": "2019-07-02T13:42:00Z",
+    "source": "docker",
+    "event": "start cloudflare_regex_2019_api_1",
+    "note": "Container api started — EVIL_REGEX_ACTIVE=0, service healthy"
+  },
+  {
+    "ts": "2019-07-02T13:42:05Z",
+    "source": "pipeline",
+    "event": "pipeline-alert=HealthzOK svc=api",
+    "note": "Baseline healthcheck pass — p99 < 10ms, CPU normal"
+  },
+  {
+    "ts": "2019-07-02T13:42:15Z",
+    "source": "docker",
+    "event": "exec cloudflare_regex_2019_api_1 (inject.sh triggered)",
+    "note": "WAF rule deployment initiated — EVIL_REGEX_ACTIVE flipped to 1, container force-recreated"
+  },
+  {
+    "ts": "2019-07-02T13:42:18Z",
+    "source": "docker",
+    "event": "stop cloudflare_regex_2019_api_1",
+    "note": "Old container stopped by force-recreate (inject.sh)"
+  },
+  {
+    "ts": "2019-07-02T13:42:21Z",
+    "source": "docker",
+    "event": "start cloudflare_regex_2019_api_1 (EVIL_REGEX_ACTIVE=1)",
+    "note": "New container starts with evil regex middleware active — every request now triggers backtracking"
+  },
+  {
+    "ts": "2019-07-02T13:42:22Z",
+    "source": "pipeline",
+    "event": "pipeline-alert=HighLatency svc=api",
+    "note": "First request with adversarial query string hits WAF middleware — regex engine enters catastrophic backtracking, p99 spikes from 8ms to 8200ms"
+  },
+  {
+    "ts": "2019-07-02T13:42:25Z",
+    "source": "prom",
+    "event": "alert=APILatencyP99 state=firing",
+    "note": "Prometheus p99 latency crosses 500ms threshold (actual ~8200ms) — alert fires after 1-minute rate window"
+  },
+  {
+    "ts": "2019-07-02T13:42:28Z",
+    "source": "pipeline",
+    "event": "pipeline-alert=CPUSaturation svc=api",
+    "note": "Container CPU pegged at 100% — regex engine consuming all available CPU cycles on backtracking"
+  },
+  {
+    "ts": "2019-07-02T13:43:00Z",
+    "source": "prom",
+    "event": "alert=ContainerCPUThrottle state=firing",
+    "note": "Container CPU throttle metric crosses 80% for sustained window — secondary confirmation of CPU saturation"
+  },
+  {
+    "ts": "2019-07-02T13:43:15Z",
+    "source": "pipeline",
+    "event": "pipeline-alert=ServiceDegraded svc=api (RCA: WAF-middleware)",
+    "note": "RCA output: api service degraded, root cause identified as CPU exhaustion at middleware layer — NOT a downstream service failure"
+  },
+  {
+    "ts": "2019-07-02T13:43:45Z",
+    "source": "pipeline",
+    "event": "pipeline-alert=RequestQueueBuildup svc=api",
+    "note": "HTTP connection queue growing — incoming requests pile behind blocked regex processing, uvicorn event loop starved"
+  },
+  {
+    "ts": "2019-07-02T13:44:00Z",
+    "source": "docker",
+    "event": "stop cloudflare_regex_2019_api_1 (mitigation — set EVIL_REGEX_ACTIVE=0)",
+    "note": "Operator sets EVIL_REGEX_ACTIVE=0 and force-recreates container to simulate rollback mitigation"
+  },
+  {
+    "ts": "2019-07-02T13:44:05Z",
+    "source": "docker",
+    "event": "start cloudflare_regex_2019_api_1 (EVIL_REGEX_ACTIVE=0)",
+    "note": "Mitigated container restarts — WAF middleware disabled, service restored"
+  },
+  {
+    "ts": "2019-07-02T13:44:10Z",
+    "source": "prom",
+    "event": "alert=APILatencyP99 state=resolved",
+    "note": "p99 latency drops back to 8ms — full recovery confirmed within 5s of rollback"
+  },
+  {
+    "ts": "2019-07-02T13:44:12Z",
+    "source": "pipeline",
+    "event": "pipeline-alert=ServiceDegraded state=resolved svc=api",
+    "note": "Pipeline confirms recovery — healthz responds < 10ms, CPU usage nominal"
+  }
+]
